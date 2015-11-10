@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "main_service",
+      "type": "java.lang.String",
+      "description": "Description for main_service."
+    }
+  ]
+}

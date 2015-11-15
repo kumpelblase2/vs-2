@@ -8,4 +8,9 @@ import de.hawhamburg.vs.restopoly.model.GameBoard;
 public class BoardDTO {
     public PlayerDTO player;
     public GameBoard board;
+
+    public BoardDTO(PlayerDTO player, GameBoard board) {
+        this.player = player;
+        this.board = board;
+    }
 }

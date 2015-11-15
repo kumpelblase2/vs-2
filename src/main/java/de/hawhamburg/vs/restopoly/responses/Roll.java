@@ -5,4 +5,7 @@ public class Roll {
     public Roll(int roll) {
         this.number = roll;
     }
+
+    public Roll() {
+    }
 }

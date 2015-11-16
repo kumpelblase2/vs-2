@@ -1,6 +1,7 @@
 package de.hawhamburg.vs.restopoly;
 
 import de.hawhamburg.vs.restopoly.api.GameService;
+import de.hawhamburg.vs.restopoly.responses.PlayerDTO;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
@@ -10,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class ClientMain {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         Retrofit retrofit = new Retrofit.Builder().baseUrl("http://localhost:8080")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -33,8 +34,33 @@ public class ClientMain {
         Response response = service.registerPlayer(gameid, name).execute();
         if(response.code() == 200) {
             System.out.println("register successful");
+            System.out.println("Ready?");
+            reader.readLine();
+            response = service.setReady(gameid, name).execute();
+            if(response.code() == 200) {
+                System.out.println("Set ready");
+            } else {
+                return;
+            }
         } else {
             System.out.println("Error. Code: " + response.code());
+            return;
+        }
+
+        while(true) {
+            boolean ownTurn;
+            do {
+                ownTurn = service.getCurrentPlayer(gameid).execute().body().id.equals(name);
+                Thread.sleep(1000);
+            } while (!ownTurn);
+
+            response = service.acquireMutex(gameid, new PlayerDTO(name, name, null, 0, true, null)).execute();
+            if(!response.isSuccess()) {
+                System.out.println("Couldn't acquire mutex.");
+                continue;
+            }
+
+            System.out.println("Acquired lock, it's your turn.");
         }
     }
 }

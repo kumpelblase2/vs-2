@@ -9,6 +9,7 @@ public class Game {
     @JsonIgnore
     private Components components;
     private List<Player> players;
+    @JsonIgnore
     private Player currentPlayer;
     @JsonIgnore
     private int currentPlayerNumber = 0;

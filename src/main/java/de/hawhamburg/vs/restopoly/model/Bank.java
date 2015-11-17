@@ -1,7 +1,5 @@
 package de.hawhamburg.vs.restopoly.model;
 
-import org.springframework.dao.DuplicateKeyException;
-
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -14,7 +12,7 @@ public class Bank {
     public Bank() {}
 
     public void createAccount(Player playerID) {
-        if (accounts.containsKey(playerID)) throw new DuplicateKeyException("Account already exists for playerID "+playerID);
+        if (accounts.containsKey(playerID)) throw new RuntimeException("Account already exists for playerID "+playerID);
         else {
             accounts.put(playerID,new BankAccount(playerID));
         }

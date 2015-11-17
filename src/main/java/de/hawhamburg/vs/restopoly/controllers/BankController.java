@@ -6,7 +6,6 @@ import de.hawhamburg.vs.restopoly.model.Player;
 import de.hawhamburg.vs.restopoly.responses.BankTransferResponce;
 import de.hawhamburg.vs.restopoly.responses.PlayerAndAmountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +28,7 @@ public class BankController {
         Game game = new Game();
         try {
             manager.getBank(game).createAccount(player, amount);
-        } catch (DuplicateKeyException e) {
+        } catch (RuntimeException e) {
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
         return new ResponseEntity(HttpStatus.CREATED);

@@ -7,18 +7,18 @@ import java.util.NoSuchElementException;
  * Created by JanDennis on 17.11.2015.
  */
 public class Bank {
-    private Map<Player, BankAccount> accounts;
+    private Map<String, BankAccount> accounts;
 
     public Bank() {}
 
-    public void createAccount(Player playerID) {
+    public void createAccount(String playerID) {
         if (accounts.containsKey(playerID)) throw new RuntimeException("Account already exists for playerID "+playerID);
         else {
             accounts.put(playerID,new BankAccount(playerID));
         }
     }
 
-    public int getBalance(Player playerID) {
+    public int getBalance(String playerID) {
         if (accounts.containsKey(playerID)) {
             return accounts.get(playerID).getBalance();
         } else {
@@ -26,15 +26,15 @@ public class Bank {
         }
     }
 
-    public void addAmount(Player playerID, int amount) {
+    public void addAmount(String playerID, int amount) {
         accounts.get(playerID).addBalance(amount);
     }
 
-    public void subtractAmount(Player playerID, int amount) {
+    public void subtractAmount(String playerID, int amount) {
         accounts.get(playerID).subtractAmount(amount);
     }
 
-    public void transferAmount(Player fromPlayer, Player toPlayer, int amount) {
+    public void transferAmount(String fromPlayer, String toPlayer, int amount) {
         BankAccount fromAccount=accounts.get(fromPlayer);
         BankAccount toAccount=accounts.get(toPlayer);
 
@@ -43,7 +43,7 @@ public class Bank {
     }
 
 
-    public void createAccount(Player player, int amount) {
+    public void createAccount(String player, int amount) {
         createAccount(player);
         addAmount(player,amount);
     }

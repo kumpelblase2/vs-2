@@ -1,5 +1,6 @@
 package de.hawhamburg.vs.restopoly.model;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -7,7 +8,7 @@ import java.util.NoSuchElementException;
  * Created by JanDennis on 17.11.2015.
  */
 public class Bank {
-    private Map<String, BankAccount> accounts;
+    private Map<String, BankAccount> accounts = new HashMap<>();
 
     public Bank() {}
 

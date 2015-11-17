@@ -10,31 +10,33 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.Optional;
 
 /**
  * Created by JanDennis on 17.11.2015.
  */
 @RestController
-public class BankController {
+public class    BankController {
     @Autowired
     private BankManager manager;
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/players")
-    public ResponseEntity createNewBankAccount(@PathVariable int gameid, @RequestBody PlayerAndAmountDTO body) {
+    public ResponseEntity createNewBankAccount(@PathVariable("gameid") int gameid, @RequestBody PlayerAndAmountDTO body) {
         String player = body.getPlayer().getId();
         int amount = body.getAmount();
 
         try {
             manager.getBank(gameid).createAccount(player, amount);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return new ResponseEntity(HttpStatus.CONFLICT);
         }
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/banks/{gameid}/players/{playerid}")
-    public ResponseEntity<Integer> getAmount(@PathVariable int gameid, @PathVariable String playerid) {
+    public ResponseEntity<Integer> getAmount(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
         int result;
         try {
             result = manager.getBank(gameid).getBalance(playerid);
@@ -48,7 +50,7 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/to/{to}/{amount}")
-    public BankTransferResponce postTranferMoneyToAccount(@PathVariable int gameid, @PathVariable String to, @PathVariable int amount, @RequestBody String reason) {
+    public BankTransferResponce postTransferMoneyToAccount(@PathVariable("gameid") int gameid, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
 
 
 //        Player player = game.getPlayers().stream().filter(pl -> pl.getId().equals(to)).findFirst().get();
@@ -59,7 +61,7 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/{amount}")
-    public BankTransferResponce postTranferMoneyFromAccount(@PathVariable int gameid, @PathVariable String from, @PathVariable int amount, @RequestBody String reason) {
+    public BankTransferResponce postTranferMoneyFromAccount(@PathVariable("gameid") int gameid, @PathVariable("from") String from, @PathVariable("amount") int amount, @RequestBody String reason) {
 
 
 //        Player player = game.getPlayers().stream().filter(pl -> pl.getId().equals(from)).findFirst().get();
@@ -70,7 +72,7 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/to/{to}/{amount}")
-    public BankTransferResponce postTranferMoneyFromAccountToAccount(@PathVariable int gameid,@PathVariable String from, @PathVariable String to, @PathVariable int amount, @RequestBody String reason) {
+    public BankTransferResponce postTranferMoneyFromAccountToAccount(@PathVariable("gameid") int gameid,@PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
 
 
 //        Player playerFrom = game.getPlayers().stream().filter(pl -> pl.getId().equals(from)).findFirst().get();

@@ -23,6 +23,8 @@ public class BankManager {
     }
 
     public Bank getBank(int gameID) {
+        if (banks.containsKey(gameID))
         return banks.get(gameID);
+        else return createBank(gameID);
     }
 }

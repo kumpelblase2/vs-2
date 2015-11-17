@@ -49,7 +49,7 @@ public class GameController {
             });
 
             if(g.getPlayers().stream().allMatch(Player::isReady)) {
-                g.setStarted(true);
+                g.start();
             }
 
             return g;

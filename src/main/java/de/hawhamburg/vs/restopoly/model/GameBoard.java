@@ -43,12 +43,16 @@ public class GameBoard {
 
     public void movePlayer(String playerid, int i) {
         int currentPosition = this.positions.get(playerid);
-        this.fields.get(currentPosition).removePlayer(playerid);
-        int nextPosition = (currentPosition + i) % this.fields.size();
-        Player player = this.players.get(playerid);
-        player.setPosition(nextPosition);
-        this.fields.get(nextPosition).getPlayers().add(player);
-        this.positions.put(playerid, nextPosition);
+        if(currentPosition > 0 && currentPosition < this.fields.size()) {
+            this.fields.get(currentPosition).removePlayer(playerid);
+            int nextPosition = (currentPosition + i) % this.fields.size();
+            Player player = this.players.get(playerid);
+            player.setPosition(nextPosition);
+            if(nextPosition > 0 && nextPosition < this.fields.size())
+                this.fields.get(nextPosition).getPlayers().add(player);
+
+            this.positions.put(playerid, nextPosition);
+        }
     }
 
     public void addPlayer(Player player) {

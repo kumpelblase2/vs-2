@@ -11,4 +11,7 @@ public class ThrowDTO {
         this.roll1 = roll1;
         this.roll2 = roll2;
     }
+
+    public ThrowDTO() {
+    }
 }

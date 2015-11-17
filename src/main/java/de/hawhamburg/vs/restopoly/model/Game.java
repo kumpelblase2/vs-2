@@ -113,4 +113,10 @@ public class Game {
     public boolean hasPlayer(String inId) {
         return this.players.stream().anyMatch(player -> player.getId().equals(inId));
     }
+
+    public void start() {
+        this.started = true;
+        this.players.stream().forEach(pl -> pl.setReady(false));
+        this.currentPlayer = this.players.get(this.currentPlayerNumber);
+    }
 }

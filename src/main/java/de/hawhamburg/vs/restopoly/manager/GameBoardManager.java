@@ -10,7 +10,7 @@ public class GameBoardManager {
     private Map<Integer, GameBoard> boards = new HashMap<>();
 
     public Optional<GameBoard> getBoard(int gameId) {
-        return Optional.of(this.boards.get(boards));
+        return Optional.ofNullable(this.boards.get(gameId));
     }
 
     public GameBoard createBoard(int gameId) {

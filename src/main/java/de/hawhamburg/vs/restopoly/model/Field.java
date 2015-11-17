@@ -5,16 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
 public class Field {
 
-    @GeneratedValue
-    @Id
     @JsonIgnore
     private int id;
-    @OneToOne
     private Place place;
-    @OneToMany
     private List<Player> players;
 
     public Field(int id, Place place, List<Player> players) {

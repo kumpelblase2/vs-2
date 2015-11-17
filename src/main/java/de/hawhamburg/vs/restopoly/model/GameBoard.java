@@ -1,22 +1,12 @@
 package de.hawhamburg.vs.restopoly.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.persistence.*;
 import java.util.List;
 import java.util.Map;
 
-@Entity
 public class GameBoard {
-    @JsonIgnore
-    @Id
-    @GeneratedValue
     private int id;
-    @OneToMany
     private List<Field> fields;
-    /*@ManyToMany(cascade = CascadeType.ALL)
-    @ElementCollection
-    private Map<String, Integer> positions;*/
+    private Map<String, Integer> positions;
 
     public GameBoard(int id, List<Field> fields, Map<String, Integer> positions) {
         this.id = id;

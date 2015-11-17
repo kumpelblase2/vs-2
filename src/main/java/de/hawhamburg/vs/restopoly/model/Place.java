@@ -1,14 +1,6 @@
 package de.hawhamburg.vs.restopoly.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
 public class Place {
-    @Id
-    @JsonIgnore
     private int id;
     private String name;
 

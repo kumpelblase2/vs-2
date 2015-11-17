@@ -2,20 +2,17 @@ package de.hawhamburg.vs.restopoly.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
 import java.util.List;
 
-@Entity
 public class Game {
-    @GeneratedValue
-    @Id
     private int gameid;
-    @Embedded
     @JsonIgnore
     private Components components;
-    @OneToMany(cascade = CascadeType.ALL)
     private List<Player> players;
-    private int currentPlayer = 0;
+    private Player currentPlayer;
+    @JsonIgnore
+    private int currentPlayerNumber = 0;
+    @JsonIgnore
     private boolean mutexAcquired = false;
     private boolean started = false;
 
@@ -53,7 +50,8 @@ public class Game {
     }
 
     public void setCurrentPlayer(int currentPlayer) {
-        this.currentPlayer = currentPlayer;
+        this.currentPlayerNumber = currentPlayer;
+        this.currentPlayer = this.players.get(currentPlayer);
     }
 
     public boolean isMutexAcquired() {
@@ -64,18 +62,16 @@ public class Game {
         this.mutexAcquired = mutexAcquired;
     }
 
-    @Transient
     public Player getCurrentPlayer() {
-        return this.players.get(this.currentPlayer);
+        return this.currentPlayer;
     }
 
-    @Transient
     public void setCurrentPlayer(Player currentPlayer) {
-        this.currentPlayer = this.players.indexOf(currentPlayer);
+        this.currentPlayer = currentPlayer;
+        this.currentPlayerNumber = this.players.indexOf(currentPlayer);
         this.mutexAcquired = false;
     }
 
-    @Transient
     public boolean canStart() {
         return this.getPlayers().stream().allMatch(Player::isReady);
     }
@@ -109,8 +105,11 @@ public class Game {
         return result;
     }
 
-    @Transient
     public void nextPlayer() {
-        this.currentPlayer = this.currentPlayer + 1 % this.players.size();
+        this.setCurrentPlayer(this.currentPlayerNumber + 1 % this.players.size());
+    }
+
+    public boolean hasPlayer(String inId) {
+        return this.players.stream().anyMatch(player -> player.getId().equals(inId));
     }
 }

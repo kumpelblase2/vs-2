@@ -1,26 +1,23 @@
 package de.hawhamburg.vs.restopoly.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-@Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Player {
-    @Id
     private String id;
     private String name;
     private int position;
     private String uri;
     private boolean ready;
+    private String place;
 
-    public Player(String id, String name, String uri, int position, boolean ready) {
+    public Player(String id, String name, String uri, int position, boolean ready, int gameid) {
         this.id = id;
         this.name = name;
         this.uri = uri;
         this.position = position;
         this.ready = ready;
-    }
-
-    public Player() {
+        this.place = String.format("/board/%d/places/%d", gameid, this.position);
     }
 
     public String getId() {

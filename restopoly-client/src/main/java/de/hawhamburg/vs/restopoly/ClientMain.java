@@ -1,7 +1,7 @@
 package de.hawhamburg.vs.restopoly;
 
 import de.hawhamburg.vs.restopoly.api.GameService;
-import de.hawhamburg.vs.restopoly.responses.PlayerDTO;
+import de.hawhamburg.vs.restopoly.model.Player;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
@@ -50,11 +50,11 @@ public class ClientMain {
         while(true) {
             boolean ownTurn;
             do {
-                ownTurn = service.getCurrentPlayer(gameid).execute().body().id.equals(name);
+                ownTurn = service.getCurrentPlayer(gameid).execute().body().getId().equals(name);
                 Thread.sleep(1000);
             } while (!ownTurn);
 
-            response = service.acquireMutex(gameid, new PlayerDTO(name, name, null, 0, true, null)).execute();
+            response = service.acquireMutex(gameid, new Player(name, name, null, 0, true, gameid)).execute();
             if(!response.isSuccess()) {
                 System.out.println("Couldn't acquire mutex.");
                 continue;

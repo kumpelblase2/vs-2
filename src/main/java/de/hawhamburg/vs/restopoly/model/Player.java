@@ -20,6 +20,12 @@ public class Player {
         this.place = String.format("/board/%d/places/%d", gameid, this.position);
     }
 
+    public Player(String id) {
+        this.id = id;
+    }
+
+    public Player() {}
+
     public String getId() {
         return id;
     }

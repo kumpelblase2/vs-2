@@ -26,8 +26,7 @@ public class BoardController {
     @Value("${main_service}")
     private String mainServiceUrl;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private RestTemplate restTemplate = new RestTemplate();
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
     public ResponseEntity movePlayer(@PathParam("gameid") int gameid, @PathParam("playerid") String playerid, @RequestBody ThrowDTO rolls) {

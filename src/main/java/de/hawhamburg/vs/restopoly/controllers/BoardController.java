@@ -28,6 +28,23 @@ public class BoardController {
 
     private RestTemplate restTemplate = new RestTemplate();
 
+    @RequestMapping(method = RequestMethod.PUT, value = "/boards/{gameid}/players/{playerid}")
+    public ResponseEntity placePlayer(@PathParam("gameid") int gameid, @PathParam("playerid") String playerid, @RequestBody Player player) {
+        return this.gameBoardManager.getBoard(gameid).map(b -> {
+            player.setId(playerid);
+            b.addPlayer(player);
+            return new ResponseEntity(HttpStatus.OK);
+        }).orElse(new ResponseEntity(HttpStatus.NOT_FOUND));
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/boards/{gameid}/players/{playerid}")
+    public ResponseEntity removePlayer(@PathParam("gameid") int gameid, @PathParam("playerid") String playerid) {
+        return this.gameBoardManager.getBoard(gameid).map(b -> {
+            b.removePlayer(playerid);
+            return new ResponseEntity(HttpStatus.OK);
+        }).orElse(new ResponseEntity(HttpStatus.NOT_FOUND));
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
     public ResponseEntity movePlayer(@PathParam("gameid") int gameid, @PathParam("playerid") String playerid, @RequestBody ThrowDTO rolls) {
         String turnCheckUrl = this.mainServiceUrl + MUTEX_CHECK_URL.replace("{gameid}", gameid + "");

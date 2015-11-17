@@ -65,4 +65,8 @@ public class Field {
         result = 31 * result + (players != null ? players.hashCode() : 0);
         return result;
     }
+
+    public void removePlayer(String playerid) {
+        this.players.removeIf(pl -> pl.getId().equals(playerid));
+    }
 }

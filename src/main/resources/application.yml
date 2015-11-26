@@ -1,1 +1,5 @@
-main_service: 'localhost:8080'
+main_service: 'http://localhost:4567'
+deck:
+  location: 'src/main/resources/deck.json'
+server:
+  port: 4567

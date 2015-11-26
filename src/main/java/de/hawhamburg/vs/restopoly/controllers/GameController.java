@@ -1,5 +1,7 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.errors.AlreadyExistsException;
+import de.hawhamburg.vs.restopoly.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameManager;
 import de.hawhamburg.vs.restopoly.model.Game;
 import de.hawhamburg.vs.restopoly.model.Player;
@@ -18,23 +20,23 @@ public class GameController {
     @Autowired
     private GameManager gameManager;
 
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/game")
-    public ResponseEntity<GameCreateResponse> createGame() {
+    public GameCreateResponse createGame() {
         Game created = this.gameManager.createGame();
-        return new ResponseEntity<>(new GameCreateResponse(created.getGameid()), HttpStatus.CREATED);
+        return new GameCreateResponse(created.getGameid());
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}")
-    public ResponseEntity registerPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player,
+    public void registerPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player,
                                @RequestParam(required = false, value = "name") String playername,
                                @RequestParam(required = false, value = "uri") String uri) {
-        return this.gameManager.getGame(gameid).map(g -> {
-            if(g.hasPlayer(player)) {
-                return new ResponseEntity(HttpStatus.CONFLICT);
-            }
-            g.getPlayers().add(new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid()));
-            return new ResponseEntity(HttpStatus.CREATED);
-        }).orElse(new ResponseEntity(HttpStatus.NOT_FOUND));
+        Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
+        if(g.hasPlayer(player)) {
+            throw new AlreadyExistsException();
+        }
+        g.getPlayers().add(new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}/ready")
@@ -63,22 +65,22 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players")
-    public ResponseEntity<List<Player>> getAllPlayers(@PathVariable("gameid") int gameid) {
+    public List<Player> getAllPlayers(@PathVariable("gameid") int gameid) {
         Optional<Game> game = this.gameManager.getGame(gameid);
-        return game.map(Game::getPlayers).map(pl -> new ResponseEntity<>(pl, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return game.map(Game::getPlayers).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/games/{gameid}/players/current")
-    public ResponseEntity<Player> getCurrentPlayer(@PathVariable("gameid") int gameid) {
-        return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer).map(pl -> new ResponseEntity<>(pl, HttpStatus.OK))
-                .orElse(new ResponseEntity<Player>(HttpStatus.NOT_FOUND));
+    public Player getCurrentPlayer(@PathVariable("gameid") int gameid) {
+        return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer)
+                .orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/turn")
-    public ResponseEntity getPlayerMutex(@PathVariable("gameid") int gameid, @RequestBody Player player) {
+    public ResponseEntity getPlayerMutex(@PathVariable("gameid") int gameid, @RequestParam("player") String playerName, @RequestBody Player player) {
         Optional<Game> game = this.gameManager.getGame(gameid);
         return game.map(g -> {
-            if(g.getCurrentPlayer().getId().equals(player.getId())) {
+            if(g.getCurrentPlayer().getId().equals(playerName)) {
                 if(g.isMutexAcquired()) {
                     return new ResponseEntity(HttpStatus.OK);
                 } else {
@@ -88,7 +90,7 @@ public class GameController {
             } else {
                 return new ResponseEntity(HttpStatus.CONFLICT);
             }
-        }).orElse(new ResponseEntity(HttpStatus.NOT_FOUND));
+        }).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/games/{gameid}/players/turn")
@@ -104,13 +106,13 @@ public class GameController {
             } else {
                 return new ResponseEntity(HttpStatus.UNAUTHORIZED);
             }
-        }).orElse(new ResponseEntity(HttpStatus.NOT_FOUND));
+        }).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/turn")
-    public ResponseEntity<Player> getPlayerMutex(@PathVariable("gameid") int gameid) {
-        return this.gameManager.getGame(gameid).filter(Game::isMutexAcquired).map(Game::getCurrentPlayer).map(pl -> new ResponseEntity<>(pl, HttpStatus.OK))
-                            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public Player getPlayerMutex(@PathVariable("gameid") int gameid) {
+        return this.gameManager.getGame(gameid).filter(Game::isMutexAcquired).map(Game::getCurrentPlayer)
+                            .orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/games")

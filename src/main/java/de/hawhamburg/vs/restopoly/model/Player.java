@@ -66,6 +66,14 @@ public class Player {
         this.uri = uri;
     }
 
+    public String getPlace() {
+        return place;
+    }
+
+    public void setPlace(String place) {
+        this.place = place;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

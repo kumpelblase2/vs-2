@@ -7,9 +7,11 @@ import de.hawhamburg.vs.restopoly.model.Game;
 import de.hawhamburg.vs.restopoly.model.Player;
 import de.hawhamburg.vs.restopoly.responses.GameCreateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,13 +19,27 @@ import java.util.Optional;
 
 @RestController
 public class GameController {
+    private static final String BOARD_URL = "/boards/%d";
+    private static final String BOARD_PLAYER_URL = "/boards/%d/players/%s";
+
     @Autowired
     private GameManager gameManager;
+
+    @Value("${main_service}")
+    private String mainServiceUrl;
+
+    private RestTemplate restTemplate = new RestTemplate();
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/game")
     public GameCreateResponse createGame() {
         Game created = this.gameManager.createGame();
+
+        String url = mainServiceUrl + String.format(BOARD_URL,created.getGameid());
+
+        ResponseEntity code = restTemplate.postForEntity(url, created, String.class);
+        //Todo Maybe react in some way?
         return new GameCreateResponse(created.getGameid());
     }
 
@@ -36,7 +52,12 @@ public class GameController {
         if(g.hasPlayer(player)) {
             throw new AlreadyExistsException();
         }
-        g.getPlayers().add(new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid()));
+        Player newPlayer = new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid());
+        g.getPlayers().add(newPlayer);
+
+        String url = mainServiceUrl + String.format(BOARD_PLAYER_URL,gameid,player);
+
+        restTemplate.put(url,newPlayer);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}/ready")

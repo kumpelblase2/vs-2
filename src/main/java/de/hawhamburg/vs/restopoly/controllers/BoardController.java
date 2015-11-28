@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class BoardController {
-    private static final String MUTEX_CHECK_URL = "/games/{gameid}/players/turn";
+    private static final String MUTEX_CHECK_URL = "/games/%d/players/turn";
 
     @Autowired
     private GameBoardManager gameBoardManager;
@@ -40,7 +40,7 @@ public class BoardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
     public void movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls) {
-        String turnCheckUrl = this.mainServiceUrl + MUTEX_CHECK_URL.replace("{gameid}", gameid + "");
+        String turnCheckUrl = this.mainServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
 

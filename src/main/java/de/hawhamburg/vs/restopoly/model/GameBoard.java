@@ -2,10 +2,7 @@ package de.hawhamburg.vs.restopoly.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameBoard {
     private List<Field> fields;
@@ -64,5 +61,9 @@ public class GameBoard {
     public void removePlayer(String playerid) {
         int position = this.positions.remove(playerid);
         this.fields.get(position).removePlayer(playerid);
+    }
+
+    public Collection<Player> getPlayers() {
+        return this.players.values();
     }
 }

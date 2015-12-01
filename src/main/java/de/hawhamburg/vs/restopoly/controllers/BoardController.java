@@ -5,12 +5,17 @@ import de.hawhamburg.vs.restopoly.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;
 import de.hawhamburg.vs.restopoly.model.GameBoard;
 import de.hawhamburg.vs.restopoly.model.Player;
+import de.hawhamburg.vs.restopoly.model.Place;
+import de.hawhamburg.vs.restopoly.model.Field;
 import de.hawhamburg.vs.restopoly.responses.ThrowDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class BoardController {
@@ -66,6 +71,11 @@ public class BoardController {
         return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
     }
 
+    @RequestMapping("/boards/{gameid}/players")
+    public Collection<Player> getPlayers(@PathVariable("gameid") int gameid) {
+        return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new).getPlayers();
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}")
     public void createBoard(@PathVariable("gameid") int gameid) {
@@ -74,5 +84,11 @@ public class BoardController {
         } else {
             this.gameBoardManager.createBoard(gameid);
         }
+    }
+
+    @RequestMapping("/boards/{gameid}/places")
+    public Collection<Place> getPlaces(@PathVariable("gameid") int gameid) {
+        return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new)
+                .getFields().stream().map(Field::getPlace).collect(Collectors.toList());
     }
 }

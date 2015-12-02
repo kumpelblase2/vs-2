@@ -1,9 +1,9 @@
 package de.hawhamburg.vs.restopoly.api;
 
 import com.squareup.okhttp.ResponseBody;
-import de.hawhamburg.vs.restopoly.model.Game;
-import de.hawhamburg.vs.restopoly.model.Player;
-import de.hawhamburg.vs.restopoly.responses.GameCreateResponse;
+import de.hawhamburg.vs.restopoly.data.model.Game;
+import de.hawhamburg.vs.restopoly.data.model.Player;
+import de.hawhamburg.vs.restopoly.data.responses.GameCreateResponse;
 import retrofit.Call;
 import retrofit.http.*;
 
@@ -32,7 +32,7 @@ public interface GameService {
     Call<Player> getCurrentPlayer(@Path("gameid") int gameId);
 
     @PUT("/games/{gameid}/players/turn")
-    Call<ResponseBody> acquireMutex(@Path("gameid") int gameId, @Body Player player);
+    Call<ResponseBody> acquireMutex(@Path("gameid") int gameId, @Query("player") String playerName, @Body Player player);
 
     @DELETE("/games/{gameid}/players/turn")
     Call<ResponseBody> releaseMutex(@Path("gameid") int gameId, @Query("player") String player);

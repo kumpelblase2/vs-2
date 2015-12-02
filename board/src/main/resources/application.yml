@@ -1,0 +1,5 @@
+main_service: 'http://localhost:4567'
+board:
+  location: 'src/main/resources/board.json'
+server:
+  port: 4567

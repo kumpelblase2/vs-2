@@ -1,0 +1,3 @@
+main_service: 'http://localhost:4567'
+server:
+  port: 4567

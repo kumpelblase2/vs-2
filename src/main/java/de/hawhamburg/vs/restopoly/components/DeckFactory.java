@@ -13,12 +13,11 @@ import java.util.ArrayList;
 
 @Component
 public class DeckFactory {
-    private Deck defaultDeck;
+    private final Deck defaultDeck;
 
     @Autowired
     public DeckFactory(@Value("${deck.location}") String inDeckLocation) throws FileNotFoundException {
         this.defaultDeck = new Gson().fromJson(new FileReader(new File(inDeckLocation)), Deck.class);
-        this.defaultDeck = new Deck(new ArrayList<>(), new ArrayList<>());
     }
 
     public Deck createDeck() {

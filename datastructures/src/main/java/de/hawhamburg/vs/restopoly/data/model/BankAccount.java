@@ -1,8 +1,5 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
-/**
- * Created by JanDennis on 17.11.2015.
- */
 public class BankAccount {
     private String playerID;
     private int balance;

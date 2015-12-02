@@ -6,9 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
-/**
- * Created by tim on 10.11.15.
- */
 @Configuration
 public class JacksonConfig {
     @Bean

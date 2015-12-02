@@ -2,9 +2,6 @@ package de.hawhamburg.vs.restopoly.data.responses;
 
 import de.hawhamburg.vs.restopoly.data.model.Player;
 
-/**
- * Created by JanDennis on 17.11.2015.
- */
 public class BankTransferResponse {
     private String type = "Tranfer";
     private String name = "Wolfgang";

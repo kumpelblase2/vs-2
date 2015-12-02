@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-/**
- * Created by JanDennis on 17.11.2015.
- */
 public class Bank {
     private Map<String, BankAccount> accounts = new HashMap<>();
 

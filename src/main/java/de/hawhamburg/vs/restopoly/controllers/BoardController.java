@@ -5,8 +5,7 @@ import de.hawhamburg.vs.restopoly.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;
 import de.hawhamburg.vs.restopoly.model.GameBoard;
 import de.hawhamburg.vs.restopoly.model.Player;
-import de.hawhamburg.vs.restopoly.model.Place;
-import de.hawhamburg.vs.restopoly.model.Field;
+import de.hawhamburg.vs.restopoly.responses.PlaceDTO;
 import de.hawhamburg.vs.restopoly.responses.ThrowDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,8 +86,8 @@ public class BoardController {
     }
 
     @RequestMapping("/boards/{gameid}/places")
-    public Collection<Place> getPlaces(@PathVariable("gameid") int gameid) {
+    public Collection<PlaceDTO> getPlaces(@PathVariable("gameid") int gameid) {
         return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new)
-                .getFields().stream().map(Field::getPlace).collect(Collectors.toList());
+                .getFields().stream().map(PlaceDTO::new).collect(Collectors.toList());
     }
 }

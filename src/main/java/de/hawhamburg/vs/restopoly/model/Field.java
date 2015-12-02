@@ -1,39 +1,31 @@
 package de.hawhamburg.vs.restopoly.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.hawhamburg.vs.restopoly.responses.PlaceDTO;
 
-import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Field {
-
-    @JsonIgnore
-    private int id;
-    private Place place;
+    private String place;
     private List<Player> players;
 
-    public Field(int id, Place place, List<Player> players) {
-        this.id = id;
+    public Field(String place, List<Player> players) {
         this.place = place;
         this.players = players;
+    }
+
+    public Field(PlaceDTO place) {
+        this(place.getName(), new ArrayList<>());
     }
 
     public Field() {
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Place getPlace() {
+    public String getPlace() {
         return place;
     }
 
-    public void setPlace(Place place) {
+    public void setPlace(String place) {
         this.place = place;
     }
 
@@ -52,17 +44,15 @@ public class Field {
 
         Field field = (Field) o;
 
-        if (id != field.id) return false;
-        if (place != null ? !place.equals(field.place) : field.place != null) return false;
-        return !(players != null ? !players.equals(field.players) : field.players != null);
+        if (getPlace() != null ? !getPlace().equals(field.getPlace()) : field.getPlace() != null) return false;
+        return !(getPlayers() != null ? !getPlayers().equals(field.getPlayers()) : field.getPlayers() != null);
 
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (place != null ? place.hashCode() : 0);
-        result = 31 * result + (players != null ? players.hashCode() : 0);
+        int result = getPlace() != null ? getPlace().hashCode() : 0;
+        result = 31 * result + (getPlayers() != null ? getPlayers().hashCode() : 0);
         return result;
     }
 

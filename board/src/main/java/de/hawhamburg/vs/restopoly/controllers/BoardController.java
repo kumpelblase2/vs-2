@@ -44,13 +44,18 @@ public class BoardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
     public void movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls) {
+        this.movePlayerRelative(gameid, playerid, rolls.roll1.number + rolls.roll2.number);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
+    public void movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
         String turnCheckUrl = this.mainServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
 
         Player player = this.restTemplate.getForObject(turnCheckUrl, Player.class);
         if(player.getId().equals(playerid)) {
-            b.movePlayer(playerid, rolls.roll1.number + rolls.roll2.number);
+            b.movePlayer(playerid, amount);
         } else {
             throw new NotFoundException();
         }

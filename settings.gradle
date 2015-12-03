@@ -7,4 +7,5 @@ include 'bank'
 include 'restopoly-client'
 include 'dice'
 include 'deck'
+include 'event'
 

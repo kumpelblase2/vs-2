@@ -1,4 +1,4 @@
-package restopoly.controllers;
+package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import restopoly.manager.GameManager;
+import de.hawhamburg.vs.restopoly.manager.GameManager;
 
 import java.util.Collection;
 import java.util.List;

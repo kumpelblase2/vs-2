@@ -1,4 +1,4 @@
-package restopoly.manager;
+package de.hawhamburg.vs.restopoly.manager;
 
 import de.hawhamburg.vs.restopoly.data.model.Game;
 import de.hawhamburg.vs.restopoly.data.model.Player;

@@ -21,6 +21,7 @@ import java.util.Optional;
 public class GameController {
     private static final String BOARD_URL = "/boards/%d";
     private static final String BOARD_PLAYER_URL = "/boards/%d/players/%s";
+    private static final String PLAYER_TURN_URL = "/turn";
 
     @Autowired
     private GameManager gameManager;
@@ -68,11 +69,13 @@ public class GameController {
                 pl.setReady(true);
                 if(g.isStarted() && g.getCurrentPlayer().equals(pl)) {
                     g.nextPlayer();
+                    notifyCurrentPlayer(g);
                 }
             });
 
             if(g.getPlayers().stream().allMatch(Player::isReady)) {
                 g.start();
+                notifyCurrentPlayer(g);
             }
 
             return g;
@@ -139,5 +142,9 @@ public class GameController {
     @RequestMapping("/games")
     public Collection<Game> getGames() {
         return this.gameManager.getAllGames();
+    }
+
+    private void notifyCurrentPlayer(Game g) {
+        this.restTemplate.postForLocation(g.getCurrentPlayer().getUri() + PLAYER_TURN_URL, null);
     }
 }

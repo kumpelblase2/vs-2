@@ -28,7 +28,7 @@ public class BrokerController {
 
     // Create Broker
     @RequestMapping(method = RequestMethod.PUT, value = "/brokers/{gameid}")
-    public HttpStatus createBoard(@PathVariable("gameid") int gameid) {
+    public HttpStatus createBroker(@PathVariable("gameid") int gameid) {
         if (this.brokerManager.getBroker(gameid).isPresent()) {
             return HttpStatus.CONFLICT;
         } else {
@@ -51,7 +51,7 @@ public class BrokerController {
     @RequestMapping(method = RequestMethod.POST, value = "/brokers/{gameid}/places/{placeid}/visit/{playerid}")
     public ResponseEntity<Collection<Event>> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
         Broker broker = brokerManager.getBroker(gameid).get();
-        String owner = broker.getOwner(placeid).getName();
+        String owner = broker.getOwner(placeid).getId();
         if (!owner.equals(player)) {
             int amount = broker.getRent(placeid);
             RestTemplate restTemplate = new RestTemplate();
@@ -74,7 +74,7 @@ public class BrokerController {
     @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
     public ResponseEntity<Collection<Event>> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(gameid).get();
-        String owner = broker.getOwner(place).getName();
+        String owner = broker.getOwner(place).getId();
         if (!broker.hasPlace(place)) return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_FOUND);
         if (!owner.equals(player)) {
             RestTemplate restTemplate = new RestTemplate();
@@ -93,6 +93,9 @@ public class BrokerController {
         Broker broker = brokerManager.getBroker(gameid).get();
         if (broker.getOwner(place) == null) {
             broker.setOwner(place, player);
+            RestTemplate restTemplate = new RestTemplate();
+            String url = String.format(bankBuyUrl,gameid,player.getId(),broker.getValue(place));
+            restTemplate.postForLocation(url,"Player "+player.getName()+" bought "+place+"from Bank");
             return new ResponseEntity<Event>(HttpStatus.OK);
         }
         //TODO

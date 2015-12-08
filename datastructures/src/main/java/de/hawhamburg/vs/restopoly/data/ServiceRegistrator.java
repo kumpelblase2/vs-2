@@ -9,4 +9,8 @@ public class ServiceRegistrator {
     public static void registerService(String at, Service toRegister) {
         restTemplate.postForLocation("http://" + at + "/services", toRegister);
     }
+
+    public static String lookupService(String at, String service) {
+        return restTemplate.getForObject(at + "/services/of/type/" + service, Service.class).getUri();
+    }
 }

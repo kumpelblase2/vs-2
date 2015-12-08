@@ -1,5 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
@@ -13,14 +14,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import de.hawhamburg.vs.restopoly.manager.GameManager;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class GameController {
-    private static final String BOARD_URL = "/boards/%d";
-    private static final String BOARD_PLAYER_URL = "/boards/%d/players/%s";
+    private static final String BOARD_URL = "/%d";
+    private static final String BOARD_PLAYER_URL = "/%d/players/%s";
     private static final String PLAYER_TURN_URL = "/turn";
 
     @Autowired
@@ -29,15 +31,21 @@ public class GameController {
     @Value("${main_service}")
     private String mainServiceUrl;
 
+    private String boardServiceUrl;
+
     private RestTemplate restTemplate = new RestTemplate();
 
+    @PostConstruct
+    public void init() {
+        this.boardServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "boards");
+    }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/game")
     public GameCreateResponse createGame() {
         Game created = this.gameManager.createGame();
 
-        String url = mainServiceUrl + String.format(BOARD_URL,created.getGameid());
+        String url = boardServiceUrl + String.format(BOARD_URL,created.getGameid());
 
         ResponseEntity code = restTemplate.postForEntity(url, created, String.class);
         //Todo Maybe react in some way?
@@ -56,7 +64,7 @@ public class GameController {
         Player newPlayer = new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid());
         g.getPlayers().add(newPlayer);
 
-        String url = mainServiceUrl + String.format(BOARD_PLAYER_URL,gameid,player);
+        String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL,gameid,player);
 
         restTemplate.put(url,newPlayer);
     }

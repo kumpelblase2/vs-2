@@ -1,5 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.model.Player;
 import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;
@@ -13,12 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @RestController
 public class BoardController {
-    private static final String MUTEX_CHECK_URL = "/games/%d/players/turn";
+    private static final String MUTEX_CHECK_URL = "/%d/players/turn";
 
     @Autowired
     private GameBoardManager gameBoardManager;
@@ -26,7 +28,15 @@ public class BoardController {
     @Value("${main_service}")
     private String mainServiceUrl;
 
+    private String gameServiceUrl;
+
     private RestTemplate restTemplate = new RestTemplate();
+
+    @PostConstruct
+    public void init() {
+        this.gameServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "games");
+    }
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.PUT, value = "/boards/{gameid}/players/{playerid}")
@@ -49,7 +59,7 @@ public class BoardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
     public void movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
-        String turnCheckUrl = this.mainServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
+        String turnCheckUrl = this.gameServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
 

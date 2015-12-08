@@ -26,10 +26,11 @@ public class Broker {
             owners.put(place,owner);
         }
     }
-    public String getOwnerID(String name) {
-        return places.get(name).getOwner();
+    public String getOwnerID(String place) {
+        return places.get(place).getOwner();
     }
-    public Player getOwner(String name) {
-        return owners.get(name);
+    public Player getOwner(String place) {
+        return owners.get(place);
     }
+    public int getValue(String place) { return places.get(place).getValue();}
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +25,8 @@ import java.util.Optional;
 public class BrokerController {
     @Autowired
     private BrokerManager brokerManager;
+
+    private final String bankTransferUrl = "/banks/%d/transfer/from/%s/to/%s/%d";
 
     // Create Broker
     @RequestMapping(method = RequestMethod.PUT,value = "/brokers/{gameid}")
@@ -47,11 +50,18 @@ public class BrokerController {
     }
 
     // Player vistited Place
-    @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST, value = "/brokers/{gameid}/places/{placeid}/visit/{playerid}")
-    public Collection<Event> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
+    public ResponseEntity<Collection<Event>> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
+        Broker broker = brokerManager.getBroker(gameid).get();
+        String owner = broker.getOwner(placeid).getName();
+        if (!owner.equals(player)) {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = String.format(bankTransferUrl,gameid,player,owner,broker.getValue(placeid));
+            restTemplate.postForLocation(url,"Player "+player+" bought "+placeid);
+            return new ResponseEntity<Collection<Event>>(HttpStatus.OK);
+        }
         //ToDo Event ?
-        return null;
+        return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_ACCEPTABLE);
     }
 
     // Returns Owner

@@ -52,16 +52,7 @@ public class BrokerController {
     // Player vistited Place
     @RequestMapping(method = RequestMethod.POST, value = "/brokers/{gameid}/places/{placeid}/visit/{playerid}")
     public ResponseEntity<Collection<Event>> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
-        Broker broker = brokerManager.getBroker(gameid).get();
-        String owner = broker.getOwner(placeid).getName();
-        if (!owner.equals(player)) {
-            RestTemplate restTemplate = new RestTemplate();
-            String url = String.format(bankTransferUrl,gameid,player,owner,broker.getValue(placeid));
-            restTemplate.postForLocation(url,"Player "+player+" bought "+placeid);
-            return new ResponseEntity<Collection<Event>>(HttpStatus.OK);
-        }
-        //ToDo Event ?
-        return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_ACCEPTABLE);
+
     }
 
     // Returns Owner
@@ -73,14 +64,21 @@ public class BrokerController {
     }
 
     //ToDo Add Events
+    // Change Owner
     @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
     public ResponseEntity<Collection<Event>> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
-        List<Event> result = new ArrayList();
         Broker broker = brokerManager.getBroker(gameid).get();
+        String owner = broker.getOwner(place).getName();
         if (!broker.hasPlace(place)) return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_FOUND);
-        if (broker.getOwner(place) == null) return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_ACCEPTABLE);
-        broker.setOwner(place,player);
-        return new ResponseEntity<Collection<Event>>(result,HttpStatus.OK);
+        if (!owner.equals(player)) {
+            RestTemplate restTemplate = new RestTemplate();
+            String url = String.format(bankTransferUrl,gameid,player,owner,broker.getValue(place));
+            restTemplate.postForLocation(url,"Player "+player+" bought "+place);
+            broker.setOwner(place,player);
+            return new ResponseEntity<Collection<Event>>(HttpStatus.OK);
+        }
+        //ToDo Event ?
+        return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_ACCEPTABLE);
     }
 
     // Buy Place, fail if not for Sale (Already owned by someone)

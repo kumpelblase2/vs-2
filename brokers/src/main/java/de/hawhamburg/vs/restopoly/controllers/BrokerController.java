@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -23,16 +25,18 @@ public class BrokerController {
     @Autowired
     private BrokerManager brokerManager;
 
-    @ResponseStatus(HttpStatus.CREATED)
+    // Create Broker
     @RequestMapping(method = RequestMethod.PUT,value = "/brokers/{gameid}")
-    public void createBoard(@PathVariable("gameid") int gameid) {
+    public HttpStatus createBoard(@PathVariable("gameid") int gameid) {
         if(this.brokerManager.getBroker(gameid).isPresent()) {
-            throw new AlreadyExistsException();
+            return HttpStatus.CONFLICT;
         } else {
             this.brokerManager.createBroker(gameid);
+            return HttpStatus.CREATED;
         }
     }
 
+    // Create Places
     @RequestMapping(method = RequestMethod.PUT, value = "/broker/{gameid}/places/{placeid}")
     public ResponseEntity<String> putNewPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid,
                                               @RequestBody Estate newPlace) {
@@ -42,13 +46,15 @@ public class BrokerController {
         //ToDO 201 Status bei neuerstellung
     }
 
+    // Player vistited Place
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST, value = "/brokers/{gameid}/places/{placeid}/visit/{playerid}")
     public Collection<Event> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
-        //ToDo Event
+        //ToDo Event ?
         return null;
     }
 
+    // Returns Owner
     @RequestMapping("/brokers/{gameid}/places/{placeid}/owner")
     public ResponseEntity<Player> getOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place) {
         Player pl = brokerManager.getBroker(gameid).get().getOwner(place);
@@ -56,13 +62,26 @@ public class BrokerController {
         return new ResponseEntity<Player>(pl,HttpStatus.OK);
     }
 
+    //ToDo Add Events
     @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
-    public ResponseEntity<Event> buyPlace(@PathVariable("gameid") int gameid,@PathVariable("placeid") String place) {
+    public ResponseEntity<Collection<Event>> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
+        List<Event> result = new ArrayList();
+        Broker broker = brokerManager.getBroker(gameid).get();
+        if (!broker.hasPlace(place)) return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_FOUND);
+        if (broker.getOwner(place) == null) return new ResponseEntity<Collection<Event>>(HttpStatus.NOT_ACCEPTABLE);
+        broker.setOwner(place,player);
+        return new ResponseEntity<Collection<Event>>(result,HttpStatus.OK);
+    }
+
+    // Buy Place, fail if not for Sale (Already owned by someone)
+    @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
+    public ResponseEntity<Event> buyPlace(@PathVariable("gameid") int gameid,@PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(gameid).get();
         if (broker.getOwner(place)==null) {
-           // broker.setOwner(place,);
+            broker.setOwner(place, player);
+            return new ResponseEntity<Event>(HttpStatus.OK);
         }
         //TODO
-        return null;
+        return new ResponseEntity<Event>(HttpStatus.CONFLICT);
     }
 }

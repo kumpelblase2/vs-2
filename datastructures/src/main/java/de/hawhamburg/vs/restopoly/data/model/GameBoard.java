@@ -55,6 +55,7 @@ public class GameBoard {
     public void addPlayer(Player player) {
         this.positions.putIfAbsent(player.getId(), 0);
         this.players.putIfAbsent(player.getId(), player);
+        this.fields.get(0).getPlayers().add(player);
         this.movePlayer(player.getId(), 0);
     }
 

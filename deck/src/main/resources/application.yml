@@ -1,5 +1,5 @@
-main_service: 'http://localhost:4567'
+main_service: 'https://vs.informatik.haw-hamburg.de/ports/8053'
 deck:
-  location: 'src/main/resources/deck.json'
+  location: 'deck.json'
 server:
   port: 4567

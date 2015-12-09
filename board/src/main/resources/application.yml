@@ -1,5 +1,5 @@
-main_service: 'http://localhost:4567'
+main_service: 'https://vs-docker.informatik.haw-hamburg.de/ports/8053'
 board:
-  location: 'src/main/resources/board.json'
+  location: 'board.json'
 server:
   port: 4567

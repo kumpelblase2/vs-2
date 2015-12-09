@@ -34,7 +34,7 @@ public class BoardController {
 
     @PostConstruct
     public void init() {
-        this.gameServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "games");
+        this.gameServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "Nyuu~Games");
     }
 
 

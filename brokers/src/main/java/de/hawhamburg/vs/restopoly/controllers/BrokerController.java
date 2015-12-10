@@ -1,6 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.errors.OwnedByYourselfException;

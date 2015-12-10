@@ -1,7 +1,5 @@
 package de.hawhamburg.vs.restopoly;
 
-import de.hawhamburg.vs.restopoly.data.SSLUtil;
-import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.model.Service;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package de.hawhamburg.vs.restopoly.data;
+package de.hawhamburg.vs.restopoly;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;

@@ -1,6 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
@@ -64,9 +64,8 @@ public class GameController {
         Player newPlayer = new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid());
         g.getPlayers().add(newPlayer);
 
-        String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL,gameid,player);
-
-        restTemplate.put(url,newPlayer);
+        String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL, gameid, player);
+        restTemplate.put(url, newPlayer);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}/ready")
@@ -77,13 +76,13 @@ public class GameController {
                 pl.setReady(true);
                 if(g.isStarted() && g.getCurrentPlayer().equals(pl)) {
                     g.nextPlayer();
-                    notifyCurrentPlayer(g);
+                    //notifyCurrentPlayer(g);
                 }
             });
 
             if(g.getPlayers().stream().allMatch(Player::isReady)) {
                 g.start();
-                notifyCurrentPlayer(g);
+                //notifyCurrentPlayer(g);
             }
 
             return g;

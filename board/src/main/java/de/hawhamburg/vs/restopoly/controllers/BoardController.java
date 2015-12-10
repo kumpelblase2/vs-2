@@ -1,6 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.data.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.model.Player;
 import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;

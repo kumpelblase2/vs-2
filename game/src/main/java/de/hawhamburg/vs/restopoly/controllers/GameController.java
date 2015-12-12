@@ -55,8 +55,7 @@ public class GameController {
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}")
     public void registerPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player,
-                               @RequestParam(required = false, value = "name") String playername,
-                               @RequestParam(required = false, value = "uri") String uri) {
+                               @RequestParam("name") String playername, @RequestParam("uri") String uri) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
         if(g.hasPlayer(player)) {
             throw new AlreadyExistsException();

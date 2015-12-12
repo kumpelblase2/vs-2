@@ -4,7 +4,6 @@ import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
-import de.hawhamburg.vs.restopoly.data.model.Player;
 import de.hawhamburg.vs.restopoly.data.responses.GameCreateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -121,7 +120,7 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/turn")
-    public ResponseEntity getPlayerMutex(@PathVariable("gameid") int gameid, @RequestParam("player") String playerName, @RequestBody Player player) {
+    public ResponseEntity getPlayerMutex(@PathVariable("gameid") int gameid, @RequestParam("player") String playerName, @RequestBody Game.Player player) {
         Optional<Game> game = this.gameManager.getGame(gameid);
         return game.map(g -> {
             if(g.getCurrentPlayer().getId().equals(playerName)) {

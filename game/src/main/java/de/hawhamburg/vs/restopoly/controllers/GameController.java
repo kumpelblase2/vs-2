@@ -41,7 +41,7 @@ public class GameController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(method = RequestMethod.POST, value = "/game")
+    @RequestMapping(method = RequestMethod.POST, value = "/games")
     public GameCreateResponse createGame() {
         Game created = this.gameManager.createGame();
 
@@ -66,6 +66,20 @@ public class GameController {
 
         String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL, gameid, player);
         restTemplate.put(url, newPlayer);
+    }
+
+    @RequestMapping("/games/{gameid}/players/{playerid}")
+    public Player getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
+        Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
+        return g.getPlayers().stream().filter(pl -> pl.getId().equals(player)).findFirst().orElseThrow(NotFoundException::new);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/games/{gameid}/players/{playerid}")
+    public void deletePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
+        Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
+        if(!g.getPlayers().removeIf(pl -> pl.getId().equals(player))) {
+            throw new NotFoundException();
+        }
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}/ready")
@@ -149,6 +163,11 @@ public class GameController {
     @RequestMapping("/games")
     public Collection<Game> getGames() {
         return this.gameManager.getAllGames();
+    }
+
+    @RequestMapping("/games/{gameid}")
+    public Game getGameInfo(@PathVariable("gameid") int gameId) {
+        return this.gameManager.getGame(gameId).orElseThrow(NotFoundException::new);
     }
 
     private void notifyCurrentPlayer(Game g) {

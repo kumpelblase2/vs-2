@@ -1,10 +1,10 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.data.dto.ComponentsDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
-import de.hawhamburg.vs.restopoly.data.responses.GameCreateResponse;
+import de.hawhamburg.vs.restopoly.data.dto.GameCreateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import de.hawhamburg.vs.restopoly.manager.GameManager;
 
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -30,24 +29,16 @@ public class GameController {
     @Value("${main_service}")
     private String mainServiceUrl;
 
-    private String boardServiceUrl;
-
     private final RestTemplate restTemplate = new RestTemplate();
-
-    @PostConstruct
-    public void init() {
-        this.boardServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "Nyuu~Board");
-    }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/games")
-    public GameCreateResponse createGame() {
-        Game created = this.gameManager.createGame();
+    public GameCreateResponse createGame(@RequestBody ComponentsDTO gameComponents) {
+        Game created = this.gameManager.createGame(gameComponents.getComponents());
 
-        String url = boardServiceUrl + String.format(BOARD_URL,created.getGameid());
+        String url = created.getComponents().getBoard() + String.format(BOARD_URL,created.getGameid());
 
-        ResponseEntity code = restTemplate.postForEntity(url, created, String.class);
-        //Todo Maybe react in some way?
+        restTemplate.postForLocation(url, gameComponents);
         return new GameCreateResponse(created.getGameid());
     }
 
@@ -62,7 +53,7 @@ public class GameController {
         Game.Player newPlayer = new Game.Player(player, playername == null ? player : playername, uri, false);
         g.getPlayers().add(newPlayer);
 
-        String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL, gameid, player);
+        String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, gameid, player);
         restTemplate.put(url, newPlayer);
     }
 

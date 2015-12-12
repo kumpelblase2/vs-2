@@ -1,6 +1,6 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
-import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;
+import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
 
 import java.util.ArrayList;
 import java.util.List;

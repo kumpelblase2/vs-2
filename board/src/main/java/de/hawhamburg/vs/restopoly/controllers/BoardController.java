@@ -2,8 +2,8 @@ package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
-import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;
-import de.hawhamburg.vs.restopoly.data.responses.ThrowDTO;
+import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
+import de.hawhamburg.vs.restopoly.data.dto.ThrowDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;

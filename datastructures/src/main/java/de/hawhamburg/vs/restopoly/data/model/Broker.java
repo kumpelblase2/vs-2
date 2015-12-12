@@ -2,9 +2,6 @@ package de.hawhamburg.vs.restopoly.data.model;
 
 import java.util.Map;
 
-/**
- * Created by JanDennis on 04.12.2015.
- */
 public class Broker {
     private Map<String, Estate> places;
     private Map<String, Player> owners;

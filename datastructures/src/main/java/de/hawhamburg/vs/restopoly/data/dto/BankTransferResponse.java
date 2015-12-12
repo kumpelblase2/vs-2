@@ -1,4 +1,4 @@
-package de.hawhamburg.vs.restopoly.data.responses;
+package de.hawhamburg.vs.restopoly.data.dto;
 
 import de.hawhamburg.vs.restopoly.data.model.Player;
 

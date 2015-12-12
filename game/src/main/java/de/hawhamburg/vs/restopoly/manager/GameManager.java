@@ -1,5 +1,6 @@
 package de.hawhamburg.vs.restopoly.manager;
 
+import de.hawhamburg.vs.restopoly.data.model.Components;
 import de.hawhamburg.vs.restopoly.data.model.Game;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +18,7 @@ public class GameManager {
     }
 
     public Game createGame() {
-        Game g = new Game(this.idCounter++, null, new ArrayList<>());
-        this.games.add(g);
-        return g;
+        return this.createGame(null);
     }
 
     public void deleteGame(int id) {
@@ -28,5 +27,11 @@ public class GameManager {
 
     public List<Game> getAllGames() {
         return games;
+    }
+
+    public Game createGame(Components components) {
+        Game g = new Game(this.idCounter++, components, new ArrayList<>());
+        this.games.add(g);
+        return g;
     }
 }

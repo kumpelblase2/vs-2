@@ -1,4 +1,4 @@
-package de.hawhamburg.vs.restopoly.data.responses;
+package de.hawhamburg.vs.restopoly.data.dto;
 
 public class Roll {
     public int number;

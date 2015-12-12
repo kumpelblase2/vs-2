@@ -3,7 +3,7 @@ package de.hawhamburg.vs.restopoly.components;
 import com.google.gson.Gson;
 import de.hawhamburg.vs.restopoly.data.model.Field;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
-import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;
+import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -1,8 +1,8 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.data.model.Player;
-import de.hawhamburg.vs.restopoly.data.responses.BankTransferResponse;
-import de.hawhamburg.vs.restopoly.data.responses.PlayerAndAmountDTO;
+import de.hawhamburg.vs.restopoly.data.dto.BankTransferResponse;
+import de.hawhamburg.vs.restopoly.data.dto.PlayerAndAmountDTO;
 import de.hawhamburg.vs.restopoly.manager.BankManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

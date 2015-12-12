@@ -1,10 +1,8 @@
 package de.hawhamburg.vs.restopoly;
 
 import de.hawhamburg.vs.restopoly.data.model.Service;
-import de.hawhamburg.vs.restopoly.data.responses.ServicesResponse;
+import de.hawhamburg.vs.restopoly.data.dto.ServicesResponse;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Random;
 
 public class ServiceRegistrator {
     private static final RestTemplate restTemplate = new RestTemplate();

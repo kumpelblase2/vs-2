@@ -3,7 +3,7 @@ package de.hawhamburg.vs.restopoly.api;
 import com.squareup.okhttp.ResponseBody;
 import de.hawhamburg.vs.restopoly.data.model.Game;
 import de.hawhamburg.vs.restopoly.data.model.Player;
-import de.hawhamburg.vs.restopoly.data.responses.GameCreateResponse;
+import de.hawhamburg.vs.restopoly.data.dto.GameCreateResponse;
 import retrofit.Call;
 import retrofit.http.*;
 

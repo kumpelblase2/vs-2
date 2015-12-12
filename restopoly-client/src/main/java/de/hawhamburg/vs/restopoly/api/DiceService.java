@@ -1,6 +1,6 @@
 package de.hawhamburg.vs.restopoly.api;
 
-import de.hawhamburg.vs.restopoly.data.responses.Roll;
+import de.hawhamburg.vs.restopoly.data.dto.Roll;
 import retrofit.Call;
 import retrofit.http.GET;
 

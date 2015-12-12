@@ -60,7 +60,7 @@ public class GameController {
         if(g.hasPlayer(player)) {
             throw new AlreadyExistsException();
         }
-        Player newPlayer = new Player(player, playername == null ? player : playername, uri, 0, false, g.getGameid());
+        Game.Player newPlayer = new Game.Player(player, playername == null ? player : playername, uri, false);
         g.getPlayers().add(newPlayer);
 
         String url = this.boardServiceUrl + String.format(BOARD_PLAYER_URL, gameid, player);
@@ -68,7 +68,7 @@ public class GameController {
     }
 
     @RequestMapping("/games/{gameid}/players/{playerid}")
-    public Player getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
+    public Game.Player getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
         return g.getPlayers().stream().filter(pl -> pl.getId().equals(player)).findFirst().orElseThrow(NotFoundException::new);
     }
@@ -93,7 +93,7 @@ public class GameController {
                 }
             });
 
-            if(g.getPlayers().stream().allMatch(Player::isReady)) {
+            if(g.getPlayers().stream().allMatch(Game.Player::isReady)) {
                 g.start();
                 //notifyCurrentPlayer(g);
             }
@@ -105,17 +105,17 @@ public class GameController {
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/{playerid}/ready")
     public boolean isPlayerReady(@PathVariable("gameid") int gameid, @PathVariable("playerid") final String playerid) {
         Optional<Game> game = this.gameManager.getGame(gameid);
-        return game.map(g -> g.getPlayers().stream().filter(Player::isReady).anyMatch(pl -> pl.getId().equals(playerid))).orElse(false);
+        return game.map(g -> g.getPlayers().stream().filter(Game.Player::isReady).anyMatch(pl -> pl.getId().equals(playerid))).orElse(false);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players")
-    public List<Player> getAllPlayers(@PathVariable("gameid") int gameid) {
+    public List<Game.Player> getAllPlayers(@PathVariable("gameid") int gameid) {
         Optional<Game> game = this.gameManager.getGame(gameid);
         return game.map(Game::getPlayers).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/games/{gameid}/players/current")
-    public Player getCurrentPlayer(@PathVariable("gameid") int gameid) {
+    public Game.Player getCurrentPlayer(@PathVariable("gameid") int gameid) {
         return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer)
                 .orElseThrow(NotFoundException::new);
     }
@@ -154,7 +154,7 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/turn")
-    public Player getPlayerMutex(@PathVariable("gameid") int gameid) {
+    public Game.Player getPlayerMutex(@PathVariable("gameid") int gameid) {
         return this.gameManager.getGame(gameid).filter(Game::isMutexAcquired).map(Game::getCurrentPlayer)
                             .orElseThrow(NotFoundException::new);
     }

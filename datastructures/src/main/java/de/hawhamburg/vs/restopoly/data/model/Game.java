@@ -119,4 +119,75 @@ public class Game {
         this.players.stream().forEach(pl -> pl.setReady(false));
         this.currentPlayer = this.players.get(this.currentPlayerNumber);
     }
+
+    public static class Player {
+        private String id;
+        private String name;
+        private String uri;
+        private boolean ready;
+
+        public Player(String id, String name, String uri, boolean ready) {
+            this.id = id;
+            this.name = name;
+            this.uri = uri;
+            this.ready = ready;
+        }
+
+        public Player(String id) {
+            this.id = id;
+        }
+
+        public Player() {}
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public boolean isReady() {
+            return ready;
+        }
+
+        public void setReady(boolean ready) {
+            this.ready = ready;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Player player = (Player) o;
+
+            if (id != null ? !id.equals(player.id) : player.id != null) return false;
+            return !(name != null ? !name.equals(player.name) : player.name != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (name != null ? name.hashCode() : 0);
+            return result;
+        }
+    }
 }

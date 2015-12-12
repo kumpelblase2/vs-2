@@ -30,13 +30,17 @@ public class BoardController {
 
     private String gameServiceUrl;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @PostConstruct
     public void init() {
         this.gameServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "Nyuu~Games");
     }
 
+    @RequestMapping("/boards")
+    public Collection<GameBoard> getBoards() {
+        return this.gameBoardManager.getBoards();
+    }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.PUT, value = "/boards/{gameid}/players/{playerid}")
@@ -100,9 +104,24 @@ public class BoardController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.DELETE, value = "/boards/{gameid}")
+    public void deleteBoard(@PathVariable("gameid") int gameid) {
+        this.gameBoardManager.deleteBoard(gameid);
+    }
+
     @RequestMapping("/boards/{gameid}/places")
     public Collection<PlaceDTO> getPlaces(@PathVariable("gameid") int gameid) {
         return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new)
                 .getFields().stream().map(PlaceDTO::new).collect(Collectors.toList());
+    }
+
+    @RequestMapping("/borads/{gameid}/places/{place}")
+    public PlaceDTO getPlace(@PathVariable("gameid") int gameid, @PathVariable("place") int place) {
+        GameBoard board = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
+        if(board.getFields().size() > place && place >= 0) {
+            return new PlaceDTO(board.getFields().get(place));
+        } else {
+            throw new NotFoundException();
+        }
     }
 }

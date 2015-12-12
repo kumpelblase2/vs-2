@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Component
 public class GameBoardManager {
-    private Map<Integer, GameBoard> boards = new HashMap<>();
+    private final Map<Integer, GameBoard> boards = new HashMap<>();
 
     @Autowired
     private BoardFactory factory;
@@ -21,11 +21,19 @@ public class GameBoardManager {
         return Optional.ofNullable(this.boards.get(gameId));
     }
 
-    public GameBoard createBoard(int gameId) {
-        return this.boards.putIfAbsent(gameId, factory.createBoard());
+    public void createBoard(int gameId) {
+        this.boards.putIfAbsent(gameId, factory.createBoard());
     }
 
     public Collection<Integer> getGameIds() {
         return boards.keySet();
+    }
+
+    public Collection<GameBoard> getBoards() {
+        return this.boards.values();
+    }
+
+    public void deleteBoard(int gameid) {
+        this.boards.remove(gameid);
     }
 }

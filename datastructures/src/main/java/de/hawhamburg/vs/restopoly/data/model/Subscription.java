@@ -1,5 +1,7 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Subscription {
     private int gameid;
     private String uri;
@@ -36,6 +38,11 @@ public class Subscription {
 
     public void setEvent(Event event) {
         this.event = event;
+    }
+
+    @JsonIgnore
+    public boolean hasValidUri() {
+        return this.uri != null && !this.uri.isEmpty();
     }
 
     @Override

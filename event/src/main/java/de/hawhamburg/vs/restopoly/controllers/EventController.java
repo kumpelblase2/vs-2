@@ -3,6 +3,8 @@ package de.hawhamburg.vs.restopoly.controllers;
 import de.hawhamburg.vs.restopoly.data.model.Event;
 import de.hawhamburg.vs.restopoly.data.model.Subscription;
 import de.hawhamburg.vs.restopoly.manager.EventManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,8 @@ import java.util.Set;
 @RestController
 public class EventController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventController.class);
+
     @Autowired
     private EventManager manager;
 
@@ -23,7 +27,13 @@ public class EventController {
     @RequestMapping(method = RequestMethod.POST, value = "/events")
     public void emitEvent(@RequestParam("gameid") int gameid, @RequestBody Event event) {
         this.manager.getSubscribersFor(gameid).stream()
-                .filter(sub -> sub.getEvent().isSame(event)).forEach(sub -> this.restTemplate.postForLocation(sub.getUri(), event));
+                .filter(sub -> sub.getEvent().isSame(event) && sub.hasValidUri()).forEach(sub -> {
+            try {
+                this.restTemplate.postForLocation(sub.getUri(), event);
+            } catch(Exception e) {
+                LOGGER.warn("Couldn't send event to uri " + sub.getUri() + " : " + e.getMessage());
+            }
+        });
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/events/subscriptions")

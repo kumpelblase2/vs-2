@@ -33,7 +33,7 @@ public class GameController {
 
     private String boardServiceUrl;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @PostConstruct
     public void init() {

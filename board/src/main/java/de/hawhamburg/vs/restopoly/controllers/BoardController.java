@@ -2,7 +2,6 @@ package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
-import de.hawhamburg.vs.restopoly.data.model.Player;
 import de.hawhamburg.vs.restopoly.data.responses.PlaceDTO;
 import de.hawhamburg.vs.restopoly.data.responses.ThrowDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
@@ -44,7 +43,7 @@ public class BoardController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.PUT, value = "/boards/{gameid}/players/{playerid}")
-    public void placePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody Player player) {
+    public void placePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody GameBoard.Player player) {
         GameBoard b = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
         player.setId(playerid);
         b.addPlayer(player);
@@ -67,7 +66,7 @@ public class BoardController {
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
 
-        Player player = this.restTemplate.getForObject(turnCheckUrl, Player.class);
+        GameBoard.Player player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         if(player.getId().equals(playerid)) {
             b.movePlayer(playerid, amount);
         } else {
@@ -76,12 +75,8 @@ public class BoardController {
     }
 
     @RequestMapping("/boards/{gameid}/players/{playerid}")
-    public Player getPlayerPosition(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
-        return this.gameBoardManager.getBoard(gameid).map(b -> b.getPositions().get(playerid)).map(pos -> {
-            Player pl = new Player(playerid);
-            pl.setPosition(pos);
-            return pl;
-        }).orElseThrow(NotFoundException::new);
+    public GameBoard.Player getPlayerPosition(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
+        return this.gameBoardManager.getBoard(gameid).map(b -> b.getPlayer(playerid)).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/boards/{gameid}")
@@ -90,7 +85,7 @@ public class BoardController {
     }
 
     @RequestMapping("/boards/{gameid}/players")
-    public Collection<Player> getPlayers(@PathVariable("gameid") int gameid) {
+    public Collection<GameBoard.Player> getPlayers(@PathVariable("gameid") int gameid) {
         return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new).getPlayers();
     }
 

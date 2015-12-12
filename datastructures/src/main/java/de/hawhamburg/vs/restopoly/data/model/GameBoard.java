@@ -67,4 +67,68 @@ public class GameBoard {
     public Collection<Player> getPlayers() {
         return this.players.values();
     }
+
+    public Player getPlayer(String playerid) {
+        return this.players.get(playerid);
+    }
+
+    public static class Player {
+        private String id;
+        private String place;
+        private int position;
+
+        public Player(String id, String place, int position) {
+            this.id = id;
+            this.place = place;
+            this.position = position;
+        }
+
+        public Player() {
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getPlace() {
+            return place;
+        }
+
+        public void setPlace(String place) {
+            this.place = place;
+        }
+
+        public int getPosition() {
+            return position;
+        }
+
+        public void setPosition(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Player player = (Player) o;
+
+            if (position != player.position) return false;
+            if (id != null ? !id.equals(player.id) : player.id != null) return false;
+            return place != null ? place.equals(player.place) : player.place == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (place != null ? place.hashCode() : 0);
+            result = 31 * result + position;
+            return result;
+        }
+    }
 }

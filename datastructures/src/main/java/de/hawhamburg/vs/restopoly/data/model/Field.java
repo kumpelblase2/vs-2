@@ -7,9 +7,9 @@ import java.util.List;
 
 public class Field {
     private String place;
-    private List<Player> players;
+    private List<GameBoard.Player> players;
 
-    public Field(String place, List<Player> players) {
+    public Field(String place, List<GameBoard.Player> players) {
         this.place = place;
         this.players = players;
     }
@@ -29,11 +29,11 @@ public class Field {
         this.place = place;
     }
 
-    public List<Player> getPlayers() {
+    public List<GameBoard.Player> getPlayers() {
         return players;
     }
 
-    public void setPlayers(List<Player> players) {
+    public void setPlayers(List<GameBoard.Player> players) {
         this.players = players;
     }
 

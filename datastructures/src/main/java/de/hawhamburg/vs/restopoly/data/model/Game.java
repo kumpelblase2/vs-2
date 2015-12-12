@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Game {
     private int gameid;
-    @JsonIgnore
     private Components components;
     private List<Player> players;
     @JsonIgnore

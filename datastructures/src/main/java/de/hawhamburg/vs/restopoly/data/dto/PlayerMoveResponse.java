@@ -1,13 +1,12 @@
 package de.hawhamburg.vs.restopoly.data.dto;
 
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
-import de.hawhamburg.vs.restopoly.data.model.Player;
 
 public class PlayerMoveResponse {
-    private Player player;
+    private GameBoard.Player player;
     private GameBoard board;
 
-    public PlayerMoveResponse(Player player, GameBoard board) {
+    public PlayerMoveResponse(GameBoard.Player player, GameBoard board) {
         this.player = player;
         this.board = board;
     }
@@ -15,11 +14,11 @@ public class PlayerMoveResponse {
     public PlayerMoveResponse() {
     }
 
-    public Player getPlayer() {
+    public GameBoard.Player getPlayer() {
         return player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(GameBoard.Player player) {
         this.player = player;
     }
 

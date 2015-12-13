@@ -1,6 +1,7 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.data.dto.PlayerMoveResponse;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
 import de.hawhamburg.vs.restopoly.data.dto.ThrowDTO;
@@ -56,12 +57,12 @@ public class BoardController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
-    public void movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls) {
-        this.movePlayerRelative(gameid, playerid, rolls.roll1.number + rolls.roll2.number);
+    public PlayerMoveResponse movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls) {
+        return this.movePlayerRelative(gameid, playerid, rolls.roll1.number + rolls.roll2.number);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
-    public void movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
+    public PlayerMoveResponse movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
         String turnCheckUrl = this.gameServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
@@ -69,6 +70,7 @@ public class BoardController {
         GameBoard.Player player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         if(player.getId().equals(playerid)) {
             b.movePlayer(playerid, amount);
+            return new PlayerMoveResponse(player, b);
         } else {
             throw new NotFoundException();
         }

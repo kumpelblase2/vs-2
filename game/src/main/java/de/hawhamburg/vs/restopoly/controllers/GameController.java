@@ -1,6 +1,8 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.data.dto.ComponentsDTO;
+import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
+import de.hawhamburg.vs.restopoly.data.dto.GameDTO;
+import de.hawhamburg.vs.restopoly.data.dto.PlayersDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
@@ -16,6 +18,7 @@ import de.hawhamburg.vs.restopoly.manager.GameManager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 public class GameController {
@@ -33,7 +36,7 @@ public class GameController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/games")
-    public GameCreateResponse createGame(@RequestBody ComponentsDTO gameComponents) {
+    public GameCreateResponse createGame(@RequestBody GameCreateDTO gameComponents) {
         Game created = this.gameManager.createGame(gameComponents.getComponents());
 
         String url = created.getComponents().getBoard() + String.format(BOARD_URL,created.getGameid());
@@ -79,13 +82,13 @@ public class GameController {
                 pl.setReady(true);
                 if(g.isStarted() && g.getCurrentPlayer().equals(pl)) {
                     g.nextPlayer();
-                    //notifyCurrentPlayer(g);
+                    notifyCurrentPlayer(g);
                 }
             });
 
             if(g.getPlayers().stream().allMatch(Game.Player::isReady)) {
                 g.start();
-                //notifyCurrentPlayer(g);
+                notifyCurrentPlayer(g);
             }
 
             return g;
@@ -99,9 +102,9 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players")
-    public List<Game.Player> getAllPlayers(@PathVariable("gameid") int gameid) {
+    public PlayersDTO getAllPlayers(@PathVariable("gameid") int gameid) {
         Optional<Game> game = this.gameManager.getGame(gameid);
-        return game.map(Game::getPlayers).orElseThrow(NotFoundException::new);
+        return game.map(g -> new PlayersDTO(g.getGameid(), g.getPlayers())).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/games/{gameid}/players/current")
@@ -150,16 +153,20 @@ public class GameController {
     }
 
     @RequestMapping("/games")
-    public Collection<Game> getGames() {
-        return this.gameManager.getAllGames();
+    public Collection<GameDTO> getGames() {
+        return this.gameManager.getAllGames().parallelStream().map(GameDTO::new).collect(Collectors.toList());
     }
 
     @RequestMapping("/games/{gameid}")
-    public Game getGameInfo(@PathVariable("gameid") int gameId) {
-        return this.gameManager.getGame(gameId).orElseThrow(NotFoundException::new);
+    public GameDTO getGameInfo(@PathVariable("gameid") int gameId) {
+        return this.gameManager.getGame(gameId).map(GameDTO::new).orElseThrow(NotFoundException::new);
     }
 
     private void notifyCurrentPlayer(Game g) {
-        this.restTemplate.postForLocation(g.getCurrentPlayer().getUri() + PLAYER_TURN_URL, null);
+        try {
+            this.restTemplate.postForLocation(g.getCurrentPlayer().getUri() + PLAYER_TURN_URL, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

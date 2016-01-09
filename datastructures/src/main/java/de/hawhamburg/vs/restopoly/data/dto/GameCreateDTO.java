@@ -2,14 +2,14 @@ package de.hawhamburg.vs.restopoly.data.dto;
 
 import de.hawhamburg.vs.restopoly.data.model.Components;
 
-public class ComponentsDTO {
+public class GameCreateDTO {
     private Components components;
 
-    public ComponentsDTO(Components components) {
+    public GameCreateDTO(Components components) {
         this.components = components;
     }
 
-    public ComponentsDTO() {
+    public GameCreateDTO() {
     }
 
     public Components getComponents() {
@@ -25,7 +25,7 @@ public class ComponentsDTO {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ComponentsDTO that = (ComponentsDTO) o;
+        GameCreateDTO that = (GameCreateDTO) o;
 
         return components != null ? components.equals(that.components) : that.components == null;
 

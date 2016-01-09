@@ -29,9 +29,6 @@ public class GameController {
     @Autowired
     private GameManager gameManager;
 
-    @Value("${main_service}")
-    private String mainServiceUrl;
-
     private final RestTemplate restTemplate = new RestTemplate();
 
     @ResponseStatus(HttpStatus.CREATED)

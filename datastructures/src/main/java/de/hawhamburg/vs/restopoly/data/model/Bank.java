@@ -1,13 +1,26 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.*;
 
 public class Bank {
     private Map<String, BankAccount> accounts = new HashMap<>();
+    private Collection<Transfer> transfers = new ArrayList<>();
+    @JsonIgnore
+    private Components components;
 
-    public Bank() {}
+    public Bank(Components components) {
+        this.components = components;
+    }
+
+    public Components getComponents() {
+        return components;
+    }
+
+    public void setComponents(Components components) {
+        this.components = components;
+    }
 
     public void createAccount(String playerID) {
         if (accounts.containsKey(playerID)) throw new RuntimeException("Account already exists for playerID "+playerID);
@@ -33,13 +46,22 @@ public class Bank {
     }
 
     public void transferAmount(String fromPlayer, String toPlayer, int amount) {
+        this.transferAmount(fromPlayer, toPlayer, amount, "Internal");
+    }
+
+    public void transferAmount(String fromPlayer, String toPlayer, int amount, String reason) {
         BankAccount fromAccount=accounts.get(fromPlayer);
         BankAccount toAccount=accounts.get(toPlayer);
 
-        fromAccount.subtractAmount(amount);
-        toAccount.addBalance(amount);
-    }
+        if(!fromPlayer.equals("bank")) {
+            fromAccount.subtractAmount(amount);
+        }
 
+        if(!toPlayer.equals("bank")) {
+            toAccount.addBalance(amount);
+        }
+        this.transfers.add(new Transfer(fromPlayer, toPlayer, amount, reason, ""));
+    }
 
     public void createAccount(String player, int amount) {
         createAccount(player);

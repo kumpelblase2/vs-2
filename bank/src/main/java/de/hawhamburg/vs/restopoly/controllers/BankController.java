@@ -1,5 +1,8 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
+import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
+import de.hawhamburg.vs.restopoly.data.model.Bank;
 import de.hawhamburg.vs.restopoly.data.model.Player;
 import de.hawhamburg.vs.restopoly.data.dto.BankTransferResponse;
 import de.hawhamburg.vs.restopoly.data.dto.PlayerAndAmountDTO;
@@ -18,9 +21,9 @@ public class BankController {
     public ResponseEntity createNewBankAccount(@PathVariable("gameid") int gameid, @RequestBody PlayerAndAmountDTO body) {
         String player = body.getPlayer().getId();
         int amount = body.getAmount();
-
+        Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         try {
-            manager.getBank(gameid).createAccount(player, amount);
+            b.createAccount(player, amount);
         } catch (RuntimeException e) {
             e.printStackTrace();
             return new ResponseEntity(HttpStatus.CONFLICT);
@@ -29,34 +32,33 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/banks/{gameid}/players/{playerid}")
-    public ResponseEntity<Integer> getAmount(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
-        int result;
-        try {
-            result = manager.getBank(gameid).getBalance(playerid);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<Integer>(result,HttpStatus.OK);
+    public Integer getAmount(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
+        return manager.getBank(gameid).orElseThrow(NotFoundException::new).getBalance(playerid);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/to/{to}/{amount}")
     public BankTransferResponse postTransferMoneyToAccount(@PathVariable("gameid") int gameid, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
-        manager.getBank(gameid).addAmount(to,amount);
+        manager.getBank(gameid).orElseThrow(NotFoundException::new).transferAmount("bank", to, amount, reason);
         return new BankTransferResponse(reason, new Player());
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/{amount}")
     public BankTransferResponse postTransferMoneyFromAccount(@PathVariable("gameid") int gameid, @PathVariable("from") String from, @PathVariable("amount") int amount, @RequestBody String reason) {
-        manager.getBank(gameid).subtractAmount(from, amount);
+        manager.getBank(gameid).orElseThrow(NotFoundException::new).transferAmount(from, "bank", amount, reason);
         return new BankTransferResponse(reason, new Player());
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/to/{to}/{amount}")
     public BankTransferResponse postTransferMoneyFromAccountToAccount(@PathVariable("gameid") int gameid, @PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
-        manager.getBank(gameid).subtractAmount(from,amount);
-        manager.getBank(gameid).addAmount(to,amount);
+        Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
+        b.transferAmount(from, to, amount, reason);
 
         return new BankTransferResponse(reason, new Player());
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}")
+    public void createNewBank(@PathVariable("gameid") int gameId, GameCreateDTO inCreateDTO) {
+        manager.createBank(gameId, inCreateDTO.getComponents());
     }
 
 }

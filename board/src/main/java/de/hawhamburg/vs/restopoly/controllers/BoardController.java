@@ -1,20 +1,17 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.ServiceRegistrator;
-import de.hawhamburg.vs.restopoly.data.dto.PlayerMoveResponse;
+import de.hawhamburg.vs.restopoly.data.dto.*;
+import de.hawhamburg.vs.restopoly.data.model.Field;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
-import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
-import de.hawhamburg.vs.restopoly.data.dto.ThrowDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -25,21 +22,11 @@ public class BoardController {
     @Autowired
     private GameBoardManager gameBoardManager;
 
-    @Value("${main_service}")
-    private String mainServiceUrl;
-
-    private String gameServiceUrl;
-
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @PostConstruct
-    public void init() {
-        this.gameServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "Nyuu~Games");
-    }
-
     @RequestMapping("/boards")
-    public Collection<GameBoard> getBoards() {
-        return this.gameBoardManager.getBoards();
+    public Collection<GameBoardDTO> getBoards() {
+        return this.gameBoardManager.getGameIds().parallelStream().map(id -> new GameBoardDTO(id, this.gameBoardManager.getBoard(id).get())).collect(Collectors.toList());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,9 +50,10 @@ public class BoardController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
     public PlayerMoveResponse movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
-        String turnCheckUrl = this.gameServiceUrl + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
+
+        String turnCheckUrl = b.getComponents().getGame() + String.format(MUTEX_CHECK_URL, gameid);
 
         GameBoard.Player player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         if(player.getId().equals(playerid)) {
@@ -82,22 +70,22 @@ public class BoardController {
     }
 
     @RequestMapping("/boards/{gameid}")
-    public GameBoard getBoard(@PathVariable("gameid") int gameid) {
-        return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
+    public GameBoardDTO getBoard(@PathVariable("gameid") int gameid) {
+        return this.gameBoardManager.getBoard(gameid).map(b -> new GameBoardDTO(gameid, b)).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping("/boards/{gameid}/players")
-    public Collection<GameBoard.Player> getPlayers(@PathVariable("gameid") int gameid) {
-        return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new).getPlayers();
+    public BoardPlayersDTO getPlayers(@PathVariable("gameid") int gameid) {
+        return this.gameBoardManager.getBoard(gameid).map(GameBoard::getPlayers).map(pl -> new BoardPlayersDTO(gameid, pl)).orElseThrow(NotFoundException::new);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}")
-    public void createBoard(@PathVariable("gameid") int gameid) {
+    public void createBoard(@PathVariable("gameid") int gameid, GameCreateDTO inGameCreateDTO) {
         if(this.gameBoardManager.getBoard(gameid).isPresent()) {
             throw new AlreadyExistsException();
         } else {
-            this.gameBoardManager.createBoard(gameid);
+            this.gameBoardManager.createBoard(gameid, inGameCreateDTO.getComponents());
         }
     }
 
@@ -107,9 +95,14 @@ public class BoardController {
     }
 
     @RequestMapping("/boards/{gameid}/places")
-    public Collection<PlaceDTO> getPlaces(@PathVariable("gameid") int gameid) {
-        return this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new)
-                .getFields().stream().map(PlaceDTO::new).collect(Collectors.toList());
+    public Collection<String> getPlaces(@PathVariable("gameid") int gameid) {
+        Collection<Field> fields = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new).getFields();
+        Collection<String> result = new ArrayList<>(fields.size());
+        for(int i = 0; i < fields.size(); i++) {
+            result.add("/boards/" + gameid + "/places/" + i);
+        }
+
+        return result;
     }
 
     @RequestMapping("/borads/{gameid}/places/{place}")

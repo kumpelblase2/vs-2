@@ -1,6 +1,7 @@
 package de.hawhamburg.vs.restopoly.components;
 
 import com.google.gson.Gson;
+import de.hawhamburg.vs.restopoly.data.model.Components;
 import de.hawhamburg.vs.restopoly.data.model.Field;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
@@ -25,7 +26,7 @@ public class BoardFactory {
         this.defaultBoard = Arrays.asList(new Gson().fromJson(new FileReader(new File(inBoardLocation)), PlaceDTO[].class));
     }
 
-    public GameBoard createBoard() {
-        return new GameBoard(defaultBoard.stream().map(Field::new).collect(Collectors.toList()), new HashMap<>());
+    public GameBoard createBoard(Components inComponents) {
+        return new GameBoard(defaultBoard.stream().map(Field::new).collect(Collectors.toList()), new HashMap<>(), inComponents);
     }
 }

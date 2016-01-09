@@ -9,10 +9,12 @@ public class GameBoard {
     private Map<String, Integer> positions;
     @JsonIgnore
     private Map<String, Player> players;
+    private Components components;
 
-    public GameBoard(List<Field> fields, Map<String, Integer> positions) {
+    public GameBoard(List<Field> fields, Map<String, Integer> positions, Components components) {
         this.fields = fields;
         this.positions = positions;
+        this.components = components;
         this.players = new HashMap<>();
     }
 
@@ -70,6 +72,14 @@ public class GameBoard {
 
     public Player getPlayer(String playerid) {
         return this.players.get(playerid);
+    }
+
+    public Components getComponents() {
+        return components;
+    }
+
+    public void setComponents(Components components) {
+        this.components = components;
     }
 
     public static class Player {

@@ -1,6 +1,7 @@
 package de.hawhamburg.vs.restopoly.manager;
 
 import de.hawhamburg.vs.restopoly.components.BoardFactory;
+import de.hawhamburg.vs.restopoly.data.model.Components;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,8 @@ public class GameBoardManager {
         return Optional.ofNullable(this.boards.get(gameId));
     }
 
-    public void createBoard(int gameId) {
-        this.boards.putIfAbsent(gameId, factory.createBoard());
+    public void createBoard(int gameId, Components inComponents) {
+        this.boards.putIfAbsent(gameId, factory.createBoard(inComponents));
     }
 
     public Collection<Integer> getGameIds() {

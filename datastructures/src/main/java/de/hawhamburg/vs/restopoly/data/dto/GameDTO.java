@@ -80,4 +80,83 @@ public class GameDTO {
         result = 31 * result + (started ? 1 : 0);
         return result;
     }
+
+    public static class PlayerDTO {
+        private String id;
+        private String name;
+        private String uri;
+        private String ready;
+
+        public PlayerDTO(String id, String name, String uri, String ready) {
+            this.id = id;
+            this.name = name;
+            this.uri = uri;
+            this.ready = ready;
+        }
+
+        public PlayerDTO() {
+        }
+
+        public PlayerDTO(int gameId, Game.Player current) {
+            this.id = current.getId();
+            this.name = current.getName();
+            this.uri = current.getUri();
+            this.ready = "/games/" + gameId + "/players/" + this.id + "/ready";
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+        public String getReady() {
+            return ready;
+        }
+
+        public void setReady(String ready) {
+            this.ready = ready;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            PlayerDTO playerDTO = (PlayerDTO) o;
+
+            if (id != null ? !id.equals(playerDTO.id) : playerDTO.id != null) return false;
+            if (name != null ? !name.equals(playerDTO.name) : playerDTO.name != null) return false;
+            if (uri != null ? !uri.equals(playerDTO.uri) : playerDTO.uri != null) return false;
+            return ready != null ? ready.equals(playerDTO.ready) : playerDTO.ready == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (name != null ? name.hashCode() : 0);
+            result = 31 * result + (uri != null ? uri.hashCode() : 0);
+            result = 31 * result + (ready != null ? ready.hashCode() : 0);
+            return result;
+        }
+    }
 }

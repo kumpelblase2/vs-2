@@ -58,9 +58,9 @@ public class GameController {
     }
 
     @RequestMapping("/games/{gameid}/players/{playerid}")
-    public Game.Player getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
+    public GameDTO.PlayerDTO getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
-        return g.getPlayers().stream().filter(pl -> pl.getId().equals(player)).findFirst().orElseThrow(NotFoundException::new);
+        return g.getPlayers().stream().filter(pl -> pl.getId().equals(player)).findFirst().map(p -> new GameDTO.PlayerDTO(gameid, p)).orElseThrow(NotFoundException::new);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/games/{gameid}/players/{playerid}")
@@ -105,8 +105,8 @@ public class GameController {
     }
 
     @RequestMapping("/games/{gameid}/players/current")
-    public Game.Player getCurrentPlayer(@PathVariable("gameid") int gameid) {
-        return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer)
+    public GameDTO.PlayerDTO getCurrentPlayer(@PathVariable("gameid") int gameid) {
+        return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer).map(p -> new GameDTO.PlayerDTO(gameid, p))
                 .orElseThrow(NotFoundException::new);
     }
 
@@ -144,8 +144,8 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/turn")
-    public Game.Player getPlayerMutex(@PathVariable("gameid") int gameid) {
-        return this.gameManager.getGame(gameid).filter(Game::isMutexAcquired).map(Game::getCurrentPlayer)
+    public GameDTO.PlayerDTO getPlayerMutex(@PathVariable("gameid") int gameid) {
+        return this.gameManager.getGame(gameid).filter(Game::isMutexAcquired).map(Game::getCurrentPlayer).map(p -> new GameDTO.PlayerDTO(gameid, p))
                             .orElseThrow(NotFoundException::new);
     }
 

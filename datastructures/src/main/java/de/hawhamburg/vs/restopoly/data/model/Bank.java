@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Bank {
     private Map<String, BankAccount> accounts = new HashMap<>();
-    private Collection<Transfer> transfers = new ArrayList<>();
+    private List<Transfer> transfers = new ArrayList<>();
     @JsonIgnore
     private Components components;
 
@@ -49,7 +49,7 @@ public class Bank {
         this.transferAmount(fromPlayer, toPlayer, amount, "Internal");
     }
 
-    public void transferAmount(String fromPlayer, String toPlayer, int amount, String reason) {
+    public int transferAmount(String fromPlayer, String toPlayer, int amount, String reason) {
         BankAccount fromAccount=accounts.get(fromPlayer);
         BankAccount toAccount=accounts.get(toPlayer);
 
@@ -61,10 +61,19 @@ public class Bank {
             toAccount.addBalance(amount);
         }
         this.transfers.add(new Transfer(fromPlayer, toPlayer, amount, reason, ""));
+        return this.transfers.size() - 1;
     }
 
     public void createAccount(String player, int amount) {
         createAccount(player);
         addAmount(player,amount);
+    }
+
+    public Transfer getTransfer(int transferId) {
+        return this.transfers.get(transferId);
+    }
+
+    public List<Transfer> getTransfers() {
+        return this.transfers;
     }
 }

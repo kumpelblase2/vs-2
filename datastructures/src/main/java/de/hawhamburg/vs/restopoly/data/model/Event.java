@@ -11,14 +11,16 @@ public class Event {
     private String type;
     private String reason;
     private String resource;
-    private Player player;
+    private String player;
+    private String uri;
 
-    public Event(String name, String type, String reason, String resource, Player player) {
+    public Event(String name, String type, String reason, String resource, String player, String uri) {
         this.name = name;
         this.type = type;
         this.reason = reason;
         this.resource = resource;
         this.player = player;
+        this.uri = uri;
     }
 
     public Event() {
@@ -56,11 +58,11 @@ public class Event {
         this.resource = resource;
     }
 
-    public Player getPlayer() {
+    public String getPlayer() {
         return player;
     }
 
-    public void setPlayer(Player player) {
+    public void setPlayer(String player) {
         this.player = player;
     }
 
@@ -78,6 +80,14 @@ public class Event {
 
     public void setGameid(int gameid) {
         this.gameid = gameid;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     @Override

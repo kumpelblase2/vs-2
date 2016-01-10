@@ -57,7 +57,7 @@ public class GameController {
         restTemplate.put(url, newPlayer);
     }
 
-    @RequestMapping("/games/{gameid}/players/{playerid}")
+    @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/{playerid}")
     public GameDTO.PlayerDTO getPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
         return g.getPlayers().stream().filter(pl -> pl.getId().equals(player)).findFirst().map(p -> new GameDTO.PlayerDTO(gameid, p)).orElseThrow(NotFoundException::new);
@@ -104,7 +104,7 @@ public class GameController {
         return game.map(g -> new PlayersDTO(g.getGameid(), g.getPlayers())).orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping("/games/{gameid}/players/current")
+    @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/current")
     public GameDTO.PlayerDTO getCurrentPlayer(@PathVariable("gameid") int gameid) {
         return this.gameManager.getGame(gameid).map(Game::getCurrentPlayer).map(p -> new GameDTO.PlayerDTO(gameid, p))
                 .orElseThrow(NotFoundException::new);
@@ -149,12 +149,12 @@ public class GameController {
                             .orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping("/games")
+    @RequestMapping(method = RequestMethod.GET, value = "/games")
     public Collection<GameDTO> getGames() {
         return this.gameManager.getAllGames().parallelStream().map(GameDTO::new).collect(Collectors.toList());
     }
 
-    @RequestMapping("/games/{gameid}")
+    @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}")
     public GameDTO getGameInfo(@PathVariable("gameid") int gameId) {
         return this.gameManager.getGame(gameId).map(GameDTO::new).orElseThrow(NotFoundException::new);
     }

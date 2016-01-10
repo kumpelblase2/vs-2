@@ -24,7 +24,7 @@ public class BoardController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @RequestMapping("/boards")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards")
     public Collection<GameBoardDTO> getBoards() {
         return this.gameBoardManager.getGameIds().parallelStream().map(id -> new GameBoardDTO(id, this.gameBoardManager.getBoard(id).get())).collect(Collectors.toList());
     }
@@ -64,17 +64,17 @@ public class BoardController {
         }
     }
 
-    @RequestMapping("/boards/{gameid}/players/{playerid}")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards/{gameid}/players/{playerid}")
     public GameBoard.Player getPlayerPosition(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
         return this.gameBoardManager.getBoard(gameid).map(b -> b.getPlayer(playerid)).orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping("/boards/{gameid}")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards/{gameid}")
     public GameBoardDTO getBoard(@PathVariable("gameid") int gameid) {
         return this.gameBoardManager.getBoard(gameid).map(b -> new GameBoardDTO(gameid, b)).orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping("/boards/{gameid}/players")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards/{gameid}/players")
     public BoardPlayersDTO getPlayers(@PathVariable("gameid") int gameid) {
         return this.gameBoardManager.getBoard(gameid).map(GameBoard::getPlayers).map(pl -> new BoardPlayersDTO(gameid, pl)).orElseThrow(NotFoundException::new);
     }
@@ -94,7 +94,7 @@ public class BoardController {
         this.gameBoardManager.deleteBoard(gameid);
     }
 
-    @RequestMapping("/boards/{gameid}/places")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards/{gameid}/places")
     public Collection<String> getPlaces(@PathVariable("gameid") int gameid) {
         Collection<Field> fields = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new).getFields();
         Collection<String> result = new ArrayList<>(fields.size());
@@ -105,7 +105,7 @@ public class BoardController {
         return result;
     }
 
-    @RequestMapping("/borads/{gameid}/places/{place}")
+    @RequestMapping(method = RequestMethod.GET, value = "/borads/{gameid}/places/{place}")
     public PlaceDTO getPlace(@PathVariable("gameid") int gameid, @PathVariable("place") int place) {
         GameBoard board = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
         if(board.getFields().size() > place && place >= 0) {

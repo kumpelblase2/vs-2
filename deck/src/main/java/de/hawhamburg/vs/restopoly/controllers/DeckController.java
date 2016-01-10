@@ -6,6 +6,7 @@ import de.hawhamburg.vs.restopoly.manager.DeckManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -13,12 +14,12 @@ public class DeckController {
     @Autowired
     private DeckManager deckManager;
 
-    @RequestMapping("/deck/{gameid}/community")
+    @RequestMapping(method = RequestMethod.GET, value = "/deck/{gameid}/community")
     public Card drawCommunityCard(@PathVariable("gameid") int gameId) {
         return deckManager.drawCommunity(gameId).orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping("/deck/{gameid}/chance")
+    @RequestMapping(method = RequestMethod.GET, value = "/deck/{gameid}/chance")
     public Card drawChanceCard(@PathVariable("gameid") int gameId) {
         return deckManager.drawChance(gameId).orElseThrow(NotFoundException::new);
     }

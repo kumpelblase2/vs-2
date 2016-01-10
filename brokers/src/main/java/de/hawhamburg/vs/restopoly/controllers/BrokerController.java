@@ -82,7 +82,7 @@ public class BrokerController {
 
     // Returns Owner
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/brokers/{gameid}/places/{placeid}/owner")
+    @RequestMapping(method = RequestMethod.GET, value = "/brokers/{gameid}/places/{placeid}/owner")
     public Player getOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place) {
         Player pl = brokerManager.getBroker(gameid).get().getOwner(place);
         if (pl == null)

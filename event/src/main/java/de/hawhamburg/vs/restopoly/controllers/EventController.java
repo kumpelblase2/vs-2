@@ -41,7 +41,7 @@ public class EventController {
         this.manager.addSubscription(subscription.getGameid(), subscription);
     }
 
-    @RequestMapping("/events/subscriptions")
+    @RequestMapping(method = RequestMethod.GET, value = "/events/subscriptions")
     public Set<Subscription> getSubscriptions(@RequestParam(value = "gameid", required = false) Integer gameid) {
         if(gameid != null) {
             return this.manager.getSubscribersFor(gameid);
@@ -51,7 +51,7 @@ public class EventController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/events")
+    @RequestMapping(method = RequestMethod.GET, value = "/events")
     public List<Event> getPastEvents(@RequestParam("gameid") int gameid) {
         return this.manager.getEventsOf(gameid);
     }

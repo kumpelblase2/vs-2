@@ -16,24 +16,14 @@ import java.util.Set;
 @RestController
 public class EventController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventController.class);
-
     @Autowired
     private EventManager manager;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST, value = "/events")
-    public void emitEvent(@RequestParam("gameid") int gameid, @RequestBody Event event) {
-        this.manager.getSubscribersFor(gameid).stream()
-                .filter(sub -> sub.getEvent().isSame(event) && sub.hasValidUri()).forEach(sub -> {
-            try {
-                this.restTemplate.postForLocation(sub.getUri(), event);
-            } catch(Exception e) {
-                LOGGER.warn("Couldn't send event to uri " + sub.getUri() + " : " + e.getMessage());
-            }
-        });
+    public String emitEvent(@RequestParam("gameid") int gameid, @RequestBody Event event) {
+        int eventId = this.manager.publishEvent(gameid, event);
+        return "/events/" + eventId;
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/events/subscriptions")

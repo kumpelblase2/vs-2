@@ -1,6 +1,12 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Event {
+    @JsonIgnore
+    private int id;
+    @JsonIgnore
+    private int gameid;
     private String name;
     private String type;
     private String reason;
@@ -56,6 +62,22 @@ public class Event {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getGameid() {
+        return gameid;
+    }
+
+    public void setGameid(int gameid) {
+        this.gameid = gameid;
     }
 
     @Override

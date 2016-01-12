@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 public class EventManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
 
-    private AtomicInteger idCount;
-    private Collection<Event> events;
+    private AtomicInteger idCount = new AtomicInteger();
+    private Collection<Event> events = new ArrayList<>();
     private Map<Integer, Set<Subscription>> subscriptions = new HashMap<>();
     private final RestTemplate restTemplate;
 

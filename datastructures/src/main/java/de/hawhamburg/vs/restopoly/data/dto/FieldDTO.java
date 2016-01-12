@@ -3,13 +3,14 @@ package de.hawhamburg.vs.restopoly.data.dto;
 import de.hawhamburg.vs.restopoly.data.model.Field;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 
+import java.util.Collection;
 import java.util.List;
 
 public class FieldDTO {
     private String place;
-    private List<GameBoard.Player> players;
+    private Collection<String> players;
 
-    public FieldDTO(String place, List<GameBoard.Player> players) {
+    public FieldDTO(String place, Collection<String> players) {
         this.place = place;
         this.players = players;
     }
@@ -19,7 +20,7 @@ public class FieldDTO {
 
     public FieldDTO(int boardId, int placePos, Field current) {
         this.place = "/boards/" + boardId + "/places/" + placePos;
-        this.players = current.getPlayers();
+        this.players = new BoardPlayersDTO(boardId, current.getPlayers()).getPlayers();
     }
 
     public String getPlace() {
@@ -30,11 +31,11 @@ public class FieldDTO {
         this.place = place;
     }
 
-    public List<GameBoard.Player> getPlayers() {
+    public Collection<String> getPlayers() {
         return players;
     }
 
-    public void setPlayers(List<GameBoard.Player> players) {
+    public void setPlayers(Collection<String> players) {
         this.players = players;
     }
 

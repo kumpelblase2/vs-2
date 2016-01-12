@@ -63,14 +63,17 @@ public class EventManager {
 
     public int publishEvent(int gameid, Event event) {
         int id = this.addEvent(gameid, event);
-        this.getSubscribersFor(gameid).stream()
-                .filter(sub -> sub.getEvent().isSame(event) && sub.hasValidUri()).forEach(sub -> {
-            try {
-                this.restTemplate.postForLocation(sub.getUri(), event);
-            } catch(Exception e) {
-                LOGGER.warn("Couldn't send event to uri " + sub.getUri() + " : " + e.getMessage());
-            }
-        });
+        Set<Subscription> subs = this.getSubscribersFor(gameid);
+        if(subs != null) {
+            subs.stream()
+                    .filter(sub -> sub.getEvent().isSame(event) && sub.hasValidUri()).forEach(sub -> {
+                        try {
+                            this.restTemplate.postForLocation(sub.getUri(), event);
+                        } catch (Exception e) {
+                            LOGGER.warn("Couldn't send event to uri " + sub.getUri() + " : " + e.getMessage());
+                        }
+                    });
+        }
 
         return id;
     }

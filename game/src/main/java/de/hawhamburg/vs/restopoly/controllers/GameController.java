@@ -1,8 +1,10 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.EventPublisher;
 import de.hawhamburg.vs.restopoly.data.dto.*;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
+import de.hawhamburg.vs.restopoly.data.model.Event;
 import de.hawhamburg.vs.restopoly.data.model.Game;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +60,10 @@ public class GameController {
 
         String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, gameid, player);
         restTemplate.put(url, new GameBoard.Player(newPlayer.getId(), "/boards/" + g.getGameid() + "/places/" + 0, 0, uri, null, null));
-        response.setHeader("Location", uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, newPlayer.getId()).toUriString());
+        String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, newPlayer.getId()).toUriString();
+        response.setHeader("Location", playerUri);
+        EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+                new Event("Player " + player + " registered in game " + g.getGameid(), "player-registered", "", playerUri, player, null));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/{playerid}")
@@ -73,10 +78,13 @@ public class GameController {
         if(!g.getPlayers().removeIf(pl -> pl.getId().equals(player))) {
             throw new NotFoundException();
         }
+
+        EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+                new Event("Player " + player + " removed from game " + g.getGameid(), "player-removed", "", "", player, null));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}/ready")
-    public void readyPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") final String playerid) {
+    public void readyPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") final String playerid, UriComponentsBuilder uriBuilder) {
         Optional<Game> game = this.gameManager.getGame(gameid);
         game.map(g -> {
             g.getPlayers().stream().filter(pl -> pl.getId().equals(playerid)).forEach(pl -> {
@@ -92,8 +100,13 @@ public class GameController {
                 notifyCurrentPlayer(g);
             }
 
+            String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, playerid).toUriString();
+            EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+                    new Event("Player " + playerid + " ready", "player-ready", "", playerUri, playerid, null));
+
             return g;
         });
+
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/{playerid}/ready")
@@ -132,11 +145,14 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/games/{gameid}/players/turn")
-    public ResponseEntity removePlayerMutex(@PathVariable("gameid") int gameid, @RequestParam("player") String playerid) {
+    public ResponseEntity removePlayerMutex(@PathVariable("gameid") int gameid, @RequestParam("player") String playerid, UriComponentsBuilder uriBuilder) {
         return this.gameManager.getGame(gameid).map(g -> {
             if(g.getCurrentPlayer().getId().equals(playerid)) {
                 if(g.isMutexAcquired()) {
                     g.setMutexAcquired(false);
+                    String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, playerid).toUriString();
+                    EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+                            new Event("Player " + playerid + " done with turn", "player-turn-over", "", playerUri, playerid, null));
                     return new ResponseEntity(HttpStatus.OK);
                 } else {
                     return new ResponseEntity(HttpStatus.NOT_FOUND);

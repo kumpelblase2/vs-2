@@ -1,30 +1,31 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
-import de.hawhamburg.vs.restopoly.data.dto.GameDTO;
-import de.hawhamburg.vs.restopoly.data.dto.PlayersDTO;
+import de.hawhamburg.vs.restopoly.data.dto.*;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Game;
-import de.hawhamburg.vs.restopoly.data.dto.GameCreateResponse;
+import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import de.hawhamburg.vs.restopoly.manager.GameManager;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 public class GameController {
-    private static final String BOARD_URL = "/%d";
-    private static final String BOARD_PLAYER_URL = "/%d/players/%s";
-    private static final String PLAYER_TURN_URL = "/turn";
+    private static final String BOARD_URL = "/boards/%d";
+    private static final String BOARD_PLAYER_URL = "/boards/%d/players/%s";
+    private static final String PLAYER_TURN_URL = "/player/turn";
+
+    private static final String GAME_URL = "/games/{gameid}";
+    private static final String PLAYER_URL = "/games/{gameid}/players/{playerid}";
 
     @Autowired
     private GameManager gameManager;
@@ -33,19 +34,21 @@ public class GameController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/games")
-    public GameCreateResponse createGame(@RequestBody GameCreateDTO gameComponents) {
+    public GameCreateResponse createGame(@RequestBody GameCreateDTO gameComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game created = this.gameManager.createGame(gameComponents.getComponents());
 
         String url = created.getComponents().getBoard() + String.format(BOARD_URL,created.getGameid());
 
         restTemplate.postForLocation(url, gameComponents);
+        response.setHeader("Location", uriBuilder.path(GAME_URL).buildAndExpand(created.getGameid()).toUriString());
         return new GameCreateResponse(created.getGameid());
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(method = RequestMethod.PUT, value = "/games/{gameid}/players/{playerid}")
+    @RequestMapping(method = RequestMethod.PUT, value = PLAYER_URL)
     public void registerPlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String player,
-                               @RequestParam("name") String playername, @RequestParam("uri") String uri) {
+                               @RequestParam("name") String playername, @RequestParam("uri") String uri,
+                               UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
         if(g.hasPlayer(player)) {
             throw new AlreadyExistsException();
@@ -54,7 +57,8 @@ public class GameController {
         g.getPlayers().add(newPlayer);
 
         String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, gameid, player);
-        restTemplate.put(url, newPlayer);
+        restTemplate.put(url, new GameBoard.Player(newPlayer.getId(), "/boards/" + g.getGameid() + "/places/" + 0, 0, uri, null, null));
+        response.setHeader("Location", uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, newPlayer.getId()).toUriString());
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}/players/{playerid}")
@@ -154,7 +158,7 @@ public class GameController {
         return this.gameManager.getAllGames().parallelStream().map(GameDTO::new).collect(Collectors.toList());
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/games/{gameid}")
+    @RequestMapping(method = RequestMethod.GET, value = GAME_URL)
     public GameDTO getGameInfo(@PathVariable("gameid") int gameId) {
         return this.gameManager.getGame(gameId).map(GameDTO::new).orElseThrow(NotFoundException::new);
     }

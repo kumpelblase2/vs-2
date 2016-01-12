@@ -1,6 +1,8 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.EventPublisher;
 import de.hawhamburg.vs.restopoly.data.dto.*;
+import de.hawhamburg.vs.restopoly.data.model.Event;
 import de.hawhamburg.vs.restopoly.data.model.Field;
 import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
@@ -56,12 +58,14 @@ public class BoardController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/roll")
-    public PlayerMoveResponse movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls) {
-        return this.movePlayerRelative(gameid, playerid, rolls.roll1.number + rolls.roll2.number);
+    public PlayerMoveResponse movePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody ThrowDTO rolls,
+                                         UriComponentsBuilder uriBuilder) {
+        return this.movePlayerRelative(gameid, playerid, rolls.roll1.number + rolls.roll2.number, uriBuilder);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
-    public PlayerMoveResponse movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount) {
+    public PlayerMoveResponse movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount,
+                                                 UriComponentsBuilder uriBuilder) {
         GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
                 .orElseThrow(NotFoundException::new);
 
@@ -70,6 +74,9 @@ public class BoardController {
         GameBoard.Player player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         if(player.getId().equals(playerid)) {
             b.movePlayer(playerid, amount);
+            String playerUri = uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(gameid, playerid).toUriString();
+            EventPublisher.sendEvent(b.getComponents().getEvents(), gameid,
+                    new Event("Player " + playerid + " moved " + amount, "player-move", "", playerUri, playerid, null));
             return new PlayerMoveResponse(player, b);
         } else {
             throw new NotFoundException();

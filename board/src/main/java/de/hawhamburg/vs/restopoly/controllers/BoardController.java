@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @RestController
 public class BoardController {
     private static final String MUTEX_CHECK_URL = "/%d/players/turn";
+    private static final String CREATED_PLAYER_LOCATION = "/boards/{gameid}/players/{playerid}";
+    private static final String CREATED_BOARD_LOCATION = "/boards/{gameid}";
 
     @Autowired
     private GameBoardManager gameBoardManager;
@@ -30,11 +34,19 @@ public class BoardController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(method = RequestMethod.PUT, value = "/boards/{gameid}/players/{playerid}")
-    public void placePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody GameBoard.Player player) {
+    @RequestMapping(method = RequestMethod.PUT, value = CREATED_PLAYER_LOCATION)
+    public void placePlayer(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody GameBoard.Player player, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         GameBoard b = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
         player.setId(playerid);
+        if(player.getMove() == null || player.getMove().isEmpty()) {
+            player.setMove("/boards/" + gameid + "/players/" + playerid + "/move");
+        }
+
+        if(player.getRoll() == null || player.getRoll().isEmpty()) {
+            player.setRoll("/boards/" + gameid + "/players/" + playerid + "/roll");
+        }
         b.addPlayer(player);
+        response.setHeader("Location", uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(gameid, playerid).toUriString());
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/boards/{gameid}/players/{playerid}")
@@ -80,12 +92,13 @@ public class BoardController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}")
-    public void createBoard(@PathVariable("gameid") int gameid, GameCreateDTO inGameCreateDTO) {
+    @RequestMapping(method = RequestMethod.POST, value = CREATED_BOARD_LOCATION)
+    public void createBoard(@PathVariable("gameid") int gameid, @RequestBody  GameCreateDTO inGameCreateDTO, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         if(this.gameBoardManager.getBoard(gameid).isPresent()) {
             throw new AlreadyExistsException();
         } else {
             this.gameBoardManager.createBoard(gameid, inGameCreateDTO.getComponents());
+            response.setHeader("Location", uriBuilder.path(CREATED_BOARD_LOCATION).buildAndExpand(gameid).toUriString());
         }
     }
 

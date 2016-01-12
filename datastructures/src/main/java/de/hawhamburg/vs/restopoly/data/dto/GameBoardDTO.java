@@ -25,4 +25,20 @@ public class GameBoardDTO {
         }
         this.positions = current.getPositions();
     }
+
+    public Collection<FieldDTO> getFields() {
+        return fields;
+    }
+
+    public void setFields(Collection<FieldDTO> fields) {
+        this.fields = fields;
+    }
+
+    public Map<String, Integer> getPositions() {
+        return positions;
+    }
+
+    public void setPositions(Map<String, Integer> positions) {
+        this.positions = positions;
+    }
 }

@@ -84,13 +84,19 @@ public class GameBoard {
 
     public static class Player {
         private String id;
+        private String uri;
         private String place;
         private int position;
+        private String move;
+        private String roll;
 
-        public Player(String id, String place, int position) {
+        public Player(String id, String place, int position, String uri, String move, String roll) {
             this.id = id;
             this.place = place;
             this.position = position;
+            this.uri = uri;
+            this.move = move;
+            this.roll = roll;
         }
 
         public Player() {
@@ -120,6 +126,30 @@ public class GameBoard {
             this.position = position;
         }
 
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+
+        public String getMove() {
+            return move;
+        }
+
+        public void setMove(String move) {
+            this.move = move;
+        }
+
+        public String getRoll() {
+            return roll;
+        }
+
+        public void setRoll(String roll) {
+            this.roll = roll;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -129,15 +159,21 @@ public class GameBoard {
 
             if (position != player.position) return false;
             if (id != null ? !id.equals(player.id) : player.id != null) return false;
-            return place != null ? place.equals(player.place) : player.place == null;
+            if (uri != null ? !uri.equals(player.uri) : player.uri != null) return false;
+            if (place != null ? !place.equals(player.place) : player.place != null) return false;
+            if (move != null ? !move.equals(player.move) : player.move != null) return false;
+            return roll != null ? roll.equals(player.roll) : player.roll == null;
 
         }
 
         @Override
         public int hashCode() {
             int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (uri != null ? uri.hashCode() : 0);
             result = 31 * result + (place != null ? place.hashCode() : 0);
             result = 31 * result + position;
+            result = 31 * result + (move != null ? move.hashCode() : 0);
+            result = 31 * result + (roll != null ? roll.hashCode() : 0);
             return result;
         }
     }

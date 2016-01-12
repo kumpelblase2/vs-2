@@ -61,8 +61,7 @@ public class EventManager {
         return this.subscriptions.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
-    public int publishEvent(int gameid, Event event) {
-        int id = this.addEvent(gameid, event);
+    public void publishEvent(int gameid, Event event) {
         Set<Subscription> subs = this.getSubscribersFor(gameid);
         if(subs != null) {
             subs.stream()
@@ -74,7 +73,15 @@ public class EventManager {
                         }
                     });
         }
+    }
 
-        return id;
+    public Event findEvent(int eventID) {
+        for(Event ev : this.events) {
+            if(ev.getId() == eventID) {
+                return ev;
+            }
+        }
+
+        return null;
     }
 }

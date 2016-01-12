@@ -29,6 +29,8 @@ public class BrokerController {
     @Autowired
     private BrokerManager brokerManager;
 
+    private RestTemplate restTemplate = new RestTemplate();
+
     @Value("${main_service}")
     private String mainServiceUrl;
 
@@ -73,9 +75,12 @@ public class BrokerController {
         String owner = broker.getOwner(placeid).getId();
         if (!owner.equals(player)) {
             int amount = broker.getRent(placeid);
-            RestTemplate restTemplate = new RestTemplate();
             String url = String.format(BANK_TRANSFER_URL, gameid, player, owner, amount);
-            restTemplate.postForLocation(bankServiceUrl + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
+            try {
+                restTemplate.postForLocation(bankServiceUrl + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return new ArrayList<>();
     }
@@ -102,9 +107,12 @@ public class BrokerController {
             throw new NotFoundException();
 
         if (!owner.equals(player.getId())) {
-            RestTemplate restTemplate = new RestTemplate();
             String url = String.format(BANK_TRANSFER_URL, gameid, player, owner, broker.getValue(place));
-            restTemplate.postForLocation(url, "Player " + player + " bought " + place);
+            try {
+                restTemplate.postForLocation(url, "Player " + player + " bought " + place);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             broker.setOwner(place, player);
             return new ArrayList<>();
         }
@@ -119,9 +127,12 @@ public class BrokerController {
         Broker broker = brokerManager.getBroker(gameid).get();
         if (broker.getOwner(place) == null) {
             broker.setOwner(place, player);
-            RestTemplate restTemplate = new RestTemplate();
             String url = String.format(BANK_BUY_URL,gameid,player.getId(),broker.getValue(place));
-            restTemplate.postForLocation(url,"Player "+player.getName()+" bought "+place+"from Bank");
+            try {
+                restTemplate.postForLocation(url, "Player " + player.getName() + " bought " + place + "from Bank");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return null;
         }
         //TODO

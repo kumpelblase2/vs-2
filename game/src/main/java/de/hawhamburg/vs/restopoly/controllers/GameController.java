@@ -41,7 +41,11 @@ public class GameController {
 
         String url = created.getComponents().getBoard() + String.format(BOARD_URL,created.getGameid());
 
-        restTemplate.postForLocation(url, gameComponents);
+        try {
+            restTemplate.postForLocation(url, gameComponents);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         response.setHeader("Location", uriBuilder.path(GAME_URL).buildAndExpand(created.getGameid()).toUriString());
         return new GameCreateResponse(created.getGameid());
     }
@@ -59,7 +63,11 @@ public class GameController {
         g.getPlayers().add(newPlayer);
 
         String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, gameid, player);
-        restTemplate.put(url, new GameBoard.Player(newPlayer.getId(), "/boards/" + g.getGameid() + "/places/" + 0, 0, uri, null, null));
+        try {
+            restTemplate.put(url, new GameBoard.Player(newPlayer.getId(), "/boards/" + g.getGameid() + "/places/" + 0, 0, uri, null, null));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, newPlayer.getId()).toUriString();
         response.setHeader("Location", playerUri);
         EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),

@@ -70,8 +70,13 @@ public class BoardController {
                 .orElseThrow(NotFoundException::new);
 
         String turnCheckUrl = b.getComponents().getGame() + String.format(MUTEX_CHECK_URL, gameid);
+        GameBoard.Player player;
+        try {
+            player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
+        } catch(Exception e) {
+            throw new NotFoundException();
+        }
 
-        GameBoard.Player player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         if(player.getId().equals(playerid)) {
             b.movePlayer(playerid, amount);
             String playerUri = uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(gameid, playerid).toUriString();

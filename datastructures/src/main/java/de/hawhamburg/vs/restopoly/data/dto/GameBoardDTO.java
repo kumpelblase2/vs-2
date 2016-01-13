@@ -18,10 +18,10 @@ public class GameBoardDTO {
     public GameBoardDTO() {
     }
 
-    public GameBoardDTO(int boardId, GameBoard current) {
+    public GameBoardDTO(GameBoard current) {
         this.fields = new ArrayList<>();
         for(int i = 0; i < current.getFields().size(); i++){
-            this.fields.add(new FieldDTO(boardId, i, current.getFields().get(i)));
+            this.fields.add(new FieldDTO(current.getId(), i, current.getFields().get(i)));
         }
         this.positions = current.getPositions();
     }

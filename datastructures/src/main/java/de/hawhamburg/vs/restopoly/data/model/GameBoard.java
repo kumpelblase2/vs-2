@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 
 public class GameBoard {
+    private int id;
     private List<Field> fields;
     private Map<String, Integer> positions;
     @JsonIgnore
     private Map<String, Player> players;
     private Components components;
 
-    public GameBoard(List<Field> fields, Map<String, Integer> positions, Components components) {
+    public GameBoard(int id, List<Field> fields, Map<String, Integer> positions, Components components) {
+        this.id = id;
         this.fields = fields;
         this.positions = positions;
         this.components = components;
@@ -80,6 +82,14 @@ public class GameBoard {
 
     public void setComponents(Components components) {
         this.components = components;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public static class Player {

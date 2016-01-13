@@ -16,6 +16,7 @@ import de.hawhamburg.vs.restopoly.manager.GameManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @RestController
 public class GameController {
     private static final String BOARD_URL = "/boards/%d";
-    private static final String BOARD_PLAYER_URL = "/boards/%d/players/%s";
+    private static final String BOARD_PLAYER_URL = "/players/%s";
     private static final String PLAYER_TURN_URL = "/player/turn";
 
     private static final String GAME_URL = "/games/{gameid}";
@@ -39,14 +40,17 @@ public class GameController {
     public GameCreateResponse createGame(@RequestBody GameCreateDTO gameComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game created = this.gameManager.createGame(gameComponents.getComponents());
 
-        String url = created.getComponents().getBoard() + String.format(BOARD_URL,created.getGameid());
+        String url = created.getComponents().getBoard() + "/boards";
 
         try {
-            restTemplate.postForLocation(url, gameComponents);
+            URI createdLocation = restTemplate.postForLocation(url, gameComponents);
+            created.getComponents().setBoard(createdLocation.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        response.setHeader("Location", uriBuilder.path(GAME_URL).buildAndExpand(created.getGameid()).toUriString());
+        String ownLocation = uriBuilder.path(GAME_URL).buildAndExpand(created.getGameid()).toUriString();
+        created.getComponents().setGame(ownLocation);
+        response.setHeader("Location", ownLocation);
         return new GameCreateResponse(created.getGameid());
     }
 
@@ -62,7 +66,7 @@ public class GameController {
         Game.Player newPlayer = new Game.Player(player, playername == null ? player : playername, uri, false);
         g.getPlayers().add(newPlayer);
 
-        String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, gameid, player);
+        String url = g.getComponents().getBoard() + String.format(BOARD_PLAYER_URL, player);
         try {
             restTemplate.put(url, new GameBoard.Player(newPlayer.getId(), "/boards/" + g.getGameid() + "/places/" + 0, 0, uri, null, null));
         } catch (Exception e) {

@@ -6,35 +6,30 @@ import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class GameBoardManager {
-    private final Map<Integer, GameBoard> boards = new HashMap<>();
+    private final Set<GameBoard> boards = new HashSet<>();
 
     @Autowired
     private BoardFactory factory;
 
-    public Optional<GameBoard> getBoard(int gameId) {
-        return Optional.ofNullable(this.boards.get(gameId));
+    public Optional<GameBoard> getBoard(int boardId) {
+        return this.boards.parallelStream().filter(b -> b.getId() == boardId).findAny();
     }
 
-    public void createBoard(int gameId, Components inComponents) {
-        this.boards.putIfAbsent(gameId, factory.createBoard(inComponents));
-    }
-
-    public Collection<Integer> getGameIds() {
-        return boards.keySet();
+    public GameBoard createBoard(Components inComponents) {
+        GameBoard gameBoard = factory.createBoard(inComponents);
+        this.boards.add(gameBoard);
+        return gameBoard;
     }
 
     public Collection<GameBoard> getBoards() {
-        return this.boards.values();
+        return this.boards;
     }
 
-    public void deleteBoard(int gameid) {
-        this.boards.remove(gameid);
+    public void deleteBoard(int boardId) {
+        this.boards.removeIf(b -> b.getId() == boardId);
     }
 }

@@ -15,11 +15,13 @@ import java.io.FileReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
 public class BoardFactory {
     private List<PlaceDTO> defaultBoard;
+    private AtomicInteger idCount = new AtomicInteger();
 
     @Autowired
     public BoardFactory(@Value("${board.location}") String inBoardLocation) throws FileNotFoundException {
@@ -27,6 +29,6 @@ public class BoardFactory {
     }
 
     public GameBoard createBoard(Components inComponents) {
-        return new GameBoard(defaultBoard.stream().map(Field::new).collect(Collectors.toList()), new HashMap<>(), inComponents);
+        return new GameBoard(idCount.incrementAndGet(), defaultBoard.stream().map(Field::new).collect(Collectors.toList()), new HashMap<>(), inComponents);
     }
 }

@@ -102,11 +102,12 @@ public class BrokerController {
     @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
     public Collection<Event> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(gameid).get();
-        String owner = broker.getOwner(place).getId();
+
         if (!broker.hasPlace(place))
             throw new NotFoundException();
 
-        if (!owner.equals(player.getId())) {
+        Player owner = broker.getOwner(place);
+        if (owner == null || !owner.getId().equals(player.getId())) {
             String url = String.format(BANK_TRANSFER_URL, gameid, player, owner, broker.getValue(place));
             try {
                 restTemplate.postForLocation(url, "Player " + player + " bought " + place);
@@ -121,7 +122,7 @@ public class BrokerController {
     }
 
     // Buy Place, fail if not for Sale (Already owned by someone)
-    @ResponseStatus(HttpStatus.OK)
+    /*@ResponseStatus(HttpStatus.OK)
     @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
     public Event buyPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(gameid).get();
@@ -137,5 +138,5 @@ public class BrokerController {
         }
         //TODO
         throw new AlreadyExistsException();
-    }
+    }*/
 }

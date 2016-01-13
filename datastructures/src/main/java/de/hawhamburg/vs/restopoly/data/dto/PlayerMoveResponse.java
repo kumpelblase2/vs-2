@@ -4,9 +4,9 @@ import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 
 public class PlayerMoveResponse {
     private GameBoard.Player player;
-    private GameBoard board;
+    private GameBoardDTO board;
 
-    public PlayerMoveResponse(GameBoard.Player player, GameBoard board) {
+    public PlayerMoveResponse(GameBoard.Player player, GameBoardDTO board) {
         this.player = player;
         this.board = board;
     }
@@ -22,11 +22,11 @@ public class PlayerMoveResponse {
         this.player = player;
     }
 
-    public GameBoard getBoard() {
+    public GameBoardDTO getBoard() {
         return board;
     }
 
-    public void setBoard(GameBoard board) {
+    public void setBoard(GameBoardDTO board) {
         this.board = board;
     }
 }

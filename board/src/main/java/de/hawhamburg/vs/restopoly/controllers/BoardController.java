@@ -8,6 +8,8 @@ import de.hawhamburg.vs.restopoly.data.model.GameBoard;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 public class BoardController {
-    private static final String MUTEX_CHECK_URL = "/%d/players/turn";
+    private static final String MUTEX_CHECK_URL = "/games/%d/players/current";
     private static final String CREATED_PLAYER_LOCATION = "/boards/{gameid}/players/{playerid}";
     private static final String CREATED_BOARD_LOCATION = "/boards/{gameid}";
 
@@ -66,14 +68,14 @@ public class BoardController {
     @RequestMapping(method = RequestMethod.POST, value = "/boards/{gameid}/players/{playerid}/move")
     public PlayerMoveResponse movePlayerRelative(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid, @RequestBody int amount,
                                                  UriComponentsBuilder uriBuilder) {
-        GameBoard b = this.gameBoardManager.getBoard(gameid).filter(bo -> bo.getPositions().containsKey(playerid))
-                .orElseThrow(NotFoundException::new);
+        GameBoard b = this.gameBoardManager.getBoard(gameid).orElseThrow(NotFoundException::new);
 
         String turnCheckUrl = b.getComponents().getGame() + String.format(MUTEX_CHECK_URL, gameid);
         GameBoard.Player player;
         try {
             player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
         } catch(Exception e) {
+            e.printStackTrace();
             throw new NotFoundException();
         }
 
@@ -82,7 +84,7 @@ public class BoardController {
             String playerUri = uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(gameid, playerid).toUriString();
             EventPublisher.sendEvent(b.getComponents().getEvents(), gameid,
                     new Event("Player " + playerid + " moved " + amount, "player-move", "", playerUri, playerid, null));
-            return new PlayerMoveResponse(player, b);
+            return new PlayerMoveResponse(player, new GameBoardDTO(gameid, b));
         } else {
             throw new NotFoundException();
         }

@@ -1,10 +1,11 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Broker {
-    private Map<String, Estate> places;
-    private Map<String, Player> owners;
+    private Map<String, Estate> places = new HashMap<>();
+    private Map<String, Player> owners = new HashMap<>();
 
     public Boolean hasPlace(String Place) {
         return places.containsKey(Place);

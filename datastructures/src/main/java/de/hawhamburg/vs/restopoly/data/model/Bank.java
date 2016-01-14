@@ -5,13 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 
 public class Bank {
+    private int id;
     private Map<String, BankAccount> accounts = new HashMap<>();
     private List<Transfer> transfers = new ArrayList<>();
     @JsonIgnore
     private Components components;
 
-    public Bank(Components components) {
+    public Bank(int id, Components components) {
         this.components = components;
+        this.id = id;
     }
 
     public Components getComponents() {
@@ -75,5 +77,37 @@ public class Bank {
 
     public List<Transfer> getTransfers() {
         return this.transfers;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Bank bank = (Bank) o;
+
+        if (getId() != bank.getId()) return false;
+        if (accounts != null ? !accounts.equals(bank.accounts) : bank.accounts != null) return false;
+        if (getTransfers() != null ? !getTransfers().equals(bank.getTransfers()) : bank.getTransfers() != null)
+            return false;
+        return getComponents() != null ? getComponents().equals(bank.getComponents()) : bank.getComponents() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId();
+        result = 31 * result + (accounts != null ? accounts.hashCode() : 0);
+        result = 31 * result + (getTransfers() != null ? getTransfers().hashCode() : 0);
+        result = 31 * result + (getComponents() != null ? getComponents().hashCode() : 0);
+        return result;
     }
 }

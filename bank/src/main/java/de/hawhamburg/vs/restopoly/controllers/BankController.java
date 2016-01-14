@@ -18,15 +18,15 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class BankController {
-    private static final String ACCOUNT_URL = "/banks/{gameid}/players/{playerid}";
-    private static final String BANKS_URL = "/banks/{gameid}";
+    private static final String ACCOUNT_URL = "/banks/{bankid}/players/{playerid}";
+    private static final String BANKS_URL = "/banks/{bankid}";
 
     @Autowired
     private BankManager manager;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/players")
-    public ResponseEntity createNewBankAccount(@PathVariable("gameid") int gameid, @RequestBody PlayerAndAmountDTO body,
+    @RequestMapping(method = RequestMethod.POST, value = "/banks/{bankid}/players")
+    public ResponseEntity createNewBankAccount(@PathVariable("bankid") int gameid, @RequestBody PlayerAndAmountDTO body,
                                                UriComponentsBuilder uriBuilder) {
         String player = body.getPlayer().getId();
         int amount = body.getAmount();
@@ -44,12 +44,12 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = ACCOUNT_URL)
-    public Integer getAmount(@PathVariable("gameid") int gameid, @PathVariable("playerid") String playerid) {
+    public Integer getAmount(@PathVariable("bankid") int gameid, @PathVariable("playerid") String playerid) {
         return manager.getBank(gameid).orElseThrow(NotFoundException::new).getBalance(playerid);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/to/{to}/{amount}")
-    public Event postTransferMoneyToAccount(@PathVariable("gameid") int gameid, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
+    @RequestMapping(method = RequestMethod.POST, value = "/banks/{bankid}/transfer/to/{to}/{amount}")
+    public Event postTransferMoneyToAccount(@PathVariable("bankid") int gameid, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
         Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount("bank", to, amount, reason);
         Event ev = new Event("Transfer " + amount + " from bank to " + to, "bank-transfer", reason, "/banks/" + gameid + "/transfers/" + transfer, "/game/" + gameid + "/players/" + to, "");
@@ -57,8 +57,8 @@ public class BankController {
         return ev;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/{amount}")
-    public Event postTransferMoneyFromAccount(@PathVariable("gameid") int gameid, @PathVariable("from") String from, @PathVariable("amount") int amount, @RequestBody String reason) {
+    @RequestMapping(method = RequestMethod.POST, value = "/banks/{bankid}/transfer/from/{from}/{amount}")
+    public Event postTransferMoneyFromAccount(@PathVariable("bankid") int gameid, @PathVariable("from") String from, @PathVariable("amount") int amount, @RequestBody String reason) {
         Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount(from, "bank", amount, reason);
         Event ev = new Event("Transfer " + amount + " from " + from + " to bank", "bank-transfer", reason, "/banks/" + gameid + "/transfers/" + transfer, "/game/" + gameid + "/players/" + from, "");
@@ -66,29 +66,29 @@ public class BankController {
         return ev;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/banks/{gameid}/transfer/from/{from}/to/{to}/{amount}")
-    public Event postTransferMoneyFromAccountToAccount(@PathVariable("gameid") int gameid, @PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
-        Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
+    @RequestMapping(method = RequestMethod.POST, value = "/banks/{bankid}/transfer/from/{from}/to/{to}/{amount}")
+    public Event postTransferMoneyFromAccountToAccount(@PathVariable("bankid") int bankid, @PathVariable("from") String from, @PathVariable("to") String to, @PathVariable("amount") int amount, @RequestBody String reason) {
+        Bank b = manager.getBank(bankid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount(from, to, amount, reason);
-        Event ev = new Event("Transfer " + amount + " from " + from + " to " + to, "bank-transfer", reason, "/banks/" + gameid + "/transfers/" + transfer, "/game/" + gameid + "/players/" + from, "");
-        createTransfer(b.getComponents(), gameid, ev);
+        Event ev = new Event("Transfer " + amount + " from " + from + " to " + to, "bank-transfer", reason, "/banks/" + bankid + "/transfers/" + transfer, b.getComponents().getGame() + "/players/" + from, "");
+        createTransfer(b.getComponents(), bankid, ev);
         return ev;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = BANKS_URL)
-    public void createNewBank(@PathVariable("gameid") int gameId, GameCreateDTO inCreateDTO, UriComponentsBuilder uriBuilder,
+    @RequestMapping(method = RequestMethod.POST, value = "/banks")
+    public void createNewBank(GameCreateDTO inCreateDTO, UriComponentsBuilder uriBuilder,
                               HttpServletResponse response) {
-        manager.createBank(gameId, inCreateDTO.getComponents());
-        response.setHeader("Location", uriBuilder.path(BANKS_URL).buildAndExpand(gameId).toUriString());
+        Bank b = manager.createBank(inCreateDTO.getComponents());
+        response.setHeader("Location", uriBuilder.path(BANKS_URL).buildAndExpand(b.getId()).toUriString());
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/banks/{gameid}/transfers/{transfer}")
-    public Transfer getTransfer(@PathVariable("gameid") int gameId, @PathVariable("transfer") int transferId) {
+    @RequestMapping(method = RequestMethod.GET, value = "/banks/{bankid}/transfers/{transfer}")
+    public Transfer getTransfer(@PathVariable("bankid") int gameId, @PathVariable("transfer") int transferId) {
         return this.manager.getBank(gameId).map(b -> b.getTransfer(transferId)).orElseThrow(NotFoundException::new);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/banks/{gameid}/transfers")
-    public TransfersDTO getTransfers(@PathVariable("gameid") int gameId) {
+    @RequestMapping(method = RequestMethod.GET, value = "/banks/{bankid}/transfers")
+    public TransfersDTO getTransfers(@PathVariable("bankid") int gameId) {
         return this.manager.getBank(gameId).map(Bank::getTransfers).map(tr -> new TransfersDTO(gameId, tr)).orElseThrow(NotFoundException::new);
     }
 

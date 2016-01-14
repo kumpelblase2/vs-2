@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 @RestController
 public class GameController {
-    private static final String BOARD_URL = "/boards/%d";
     private static final String BOARD_PLAYER_URL = "/players/%s";
     private static final String PLAYER_TURN_URL = "/player/turn";
 

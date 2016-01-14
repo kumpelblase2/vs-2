@@ -7,11 +7,12 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class GameManager {
     private final List<Game> games = new ArrayList<>();
-    private int idCounter = 1;
+    private AtomicInteger idCounter = new AtomicInteger();
 
     public Optional<Game> getGame(int id) {
         return this.games.stream().filter(g -> g.getGameid() == id).findFirst();
@@ -30,7 +31,7 @@ public class GameManager {
     }
 
     public Game createGame(Components components) {
-        Game g = new Game(this.idCounter++, components, new ArrayList<>());
+        Game g = new Game(this.idCounter.incrementAndGet(), components, new ArrayList<>());
         this.games.add(g);
         return g;
     }

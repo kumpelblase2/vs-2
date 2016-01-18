@@ -4,13 +4,15 @@ import de.hawhamburg.vs.restopoly.data.model.Field;
 
 public class PlaceDTO {
     public String name;
+    public String broker;
 
-    public PlaceDTO(String name) {
+    public PlaceDTO(String name, String broker) {
         this.name = name;
+        this.broker = broker;
     }
 
-    public PlaceDTO(Field inField) {
-        this(inField.getPlace());
+    public PlaceDTO(Field inField, String broker) {
+        this(inField.getPlace(), broker);
     }
 
     public String getName() {
@@ -19,5 +21,13 @@ public class PlaceDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBroker() {
+        return broker;
+    }
+
+    public void setBroker(String broker) {
+        this.broker = broker;
     }
 }

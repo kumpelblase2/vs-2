@@ -18,9 +18,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@CrossOrigin
 @RestController
 public class BoardController {
-    private static final String MUTEX_CHECK_URL = "/games/%d/players/current";
+    private static final String MUTEX_CHECK_URL = "/players/current";
     private static final String CREATED_PLAYER_LOCATION = "/boards/{boardid}/players/{playerid}";
     private static final String CREATED_BOARD_LOCATION = "/boards/{boardid}";
 
@@ -75,7 +76,7 @@ public class BoardController {
                                                  UriComponentsBuilder uriBuilder) {
         GameBoard b = this.gameBoardManager.getBoard(boardid).orElseThrow(NotFoundException::new);
 
-        String turnCheckUrl = b.getComponents().getGame() + String.format(MUTEX_CHECK_URL, boardid);
+        String turnCheckUrl = b.getComponents().getGame() + MUTEX_CHECK_URL;
         GameBoard.Player player;
         try {
             player = this.restTemplate.getForObject(turnCheckUrl, GameBoard.Player.class);
@@ -130,7 +131,7 @@ public class BoardController {
     public PlaceDTO getPlace(@PathVariable("boardid") int boardid, @PathVariable("place") int place) {
         GameBoard board = this.gameBoardManager.getBoard(boardid).orElseThrow(NotFoundException::new);
         if(board.getFields().size() > place && place >= 0) {
-            return new PlaceDTO(board.getFields().get(place));
+            return new PlaceDTO(board.getFields().get(place), board.getComponents().getBroker() + "/places/" + place);
         } else {
             throw new NotFoundException();
         }

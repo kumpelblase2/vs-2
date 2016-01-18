@@ -9,10 +9,12 @@ import java.util.Map;
 public class GameBoardDTO {
     private Collection<FieldDTO> fields;
     private Map<String, Integer> positions;
+    private String players;
 
-    public GameBoardDTO(Collection<FieldDTO> fields, Map<String, Integer> positions) {
+    public GameBoardDTO(Collection<FieldDTO> fields, Map<String, Integer> positions, String players) {
         this.fields = fields;
         this.positions = positions;
+        this.players = players;
     }
 
     public GameBoardDTO() {
@@ -24,6 +26,7 @@ public class GameBoardDTO {
             this.fields.add(new FieldDTO(current.getId(), i, current.getFields().get(i)));
         }
         this.positions = current.getPositions();
+        this.players = "/boards/" + current.getId() + "/players";
     }
 
     public Collection<FieldDTO> getFields() {

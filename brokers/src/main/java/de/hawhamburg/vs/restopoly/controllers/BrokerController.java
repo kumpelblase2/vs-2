@@ -53,7 +53,7 @@ public class BrokerController {
     }
 
     // Create Places
-    @RequestMapping(method = RequestMethod.PUT, value = "/broker/{gameid}/places/{placeid}")
+    @RequestMapping(method = RequestMethod.PUT, value = "/brokers/{gameid}/places/{placeid}")
     public ResponseEntity<String> putNewPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid,
                                               @RequestBody Estate newPlace) {
         Optional<Broker> broker = brokerManager.getBroker(gameid);
@@ -99,7 +99,7 @@ public class BrokerController {
     //ToDo Add Events
     // Change Owner
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
+    @RequestMapping(method = RequestMethod.POST, value = "/brokers/{gameid}/places/{placeid}/owner")
     public Collection<Event> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(gameid).get();
 

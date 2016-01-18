@@ -32,6 +32,7 @@ public class GameManager {
 
     public Game createGame(Components components) {
         Game g = new Game(this.idCounter.incrementAndGet(), components, new ArrayList<>());
+        components.setGame(components.getGame() + "/games/" + g.getGameid());
         this.games.add(g);
         return g;
     }

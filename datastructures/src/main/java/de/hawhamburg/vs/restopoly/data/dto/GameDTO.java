@@ -86,12 +86,14 @@ public class GameDTO {
         private String name;
         private String uri;
         private String ready;
+        private String turn;
 
-        public PlayerDTO(String id, String name, String uri, String ready) {
+        public PlayerDTO(String id, String name, String uri, String ready, String turn) {
             this.id = id;
             this.name = name;
             this.uri = uri;
             this.ready = ready;
+            this.turn = turn;
         }
 
         public PlayerDTO() {
@@ -102,6 +104,7 @@ public class GameDTO {
             this.name = current.getName();
             this.uri = current.getUri();
             this.ready = "/games/" + gameId + "/players/" + this.id + "/ready";
+            this.turn = "/games/" + gameId + "/players/turn?player=" + this.id;
         }
 
         public String getId() {

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@CrossOrigin
 @RestController
 public class GameController {
     private static final String BOARD_PLAYER_URL = "/players/%s";
@@ -36,10 +37,11 @@ public class GameController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST, value = "/games")
-    public GameCreateResponse createGame(@RequestBody GameCreateDTO gameComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
+    public String createGame(@RequestBody GameCreateDTO gameComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game created = this.gameManager.createGame(gameComponents.getComponents());
 
         String url = created.getComponents().getBoard() + "/boards";
+        created.getComponents().setDice(created.getComponents().getDice() + "/dice");
 
         try {
             URI createdLocation = restTemplate.postForLocation(url, gameComponents);
@@ -50,7 +52,7 @@ public class GameController {
         String ownLocation = uriBuilder.path(GAME_URL).buildAndExpand(created.getGameid()).toUriString();
         created.getComponents().setGame(ownLocation);
         response.setHeader("Location", ownLocation);
-        return new GameCreateResponse(created.getGameid());
+        return "/games/" + created.getGameid();
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -181,8 +183,8 @@ public class GameController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/games")
-    public Collection<GameDTO> getGames() {
-        return this.gameManager.getAllGames().parallelStream().map(GameDTO::new).collect(Collectors.toList());
+    public Collection<String> getGames() {
+        return this.gameManager.getAllGames().parallelStream().map(g -> "/games/" + g.getGameid()).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.GET, value = GAME_URL)

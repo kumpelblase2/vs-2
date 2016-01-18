@@ -106,7 +106,7 @@ public class Game {
     }
 
     public void nextPlayer() {
-        this.setCurrentPlayer(this.currentPlayerNumber + 1 % this.players.size());
+        this.setCurrentPlayer((this.currentPlayerNumber + 1) % this.players.size());
     }
 
     public boolean hasPlayer(String inId) {

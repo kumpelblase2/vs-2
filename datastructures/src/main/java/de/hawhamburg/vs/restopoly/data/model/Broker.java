@@ -1,5 +1,7 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
+import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +18,8 @@ public class Broker {
     }
 
     public void setOwner(String place, Player owner) {
+        //Check if Place exists
+        places.keySet().stream().filter(pl -> pl == place).findFirst().orElseThrow(NotFoundException::new);
         if (owners.containsKey(place)) {
             owners.replace(place, owner);
         } else {

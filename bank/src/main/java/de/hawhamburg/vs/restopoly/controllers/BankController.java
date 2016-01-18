@@ -16,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 
+@CrossOrigin
 @RestController
 public class BankController {
     private static final String ACCOUNT_URL = "/banks/{bankid}/players/{playerid}";

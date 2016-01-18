@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+@CrossOrigin
 @RestController
 public class BrokerController {
     private static final String BANK_TRANSFER_URL = "/%d/transfer/from/%s/to/%s/%d";

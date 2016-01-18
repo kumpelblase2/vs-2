@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@CrossOrigin
 @RestController
 public class EventController {
     private static final String EVENTS_URL = "/events/{eventid}";

@@ -39,6 +39,7 @@ public class GameController {
     @RequestMapping(method = RequestMethod.POST, value = "/games")
     public String createGame(@RequestBody GameCreateDTO gameComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game created = this.gameManager.createGame(gameComponents.getComponents());
+        created.getComponents().setEvents(created.getComponents().getEvents() + "/events?gameid=" + created.getGameid());
 
         String url = created.getComponents().getBoard() + "/boards";
         created.getComponents().setDice(created.getComponents().getDice() + "/dice");

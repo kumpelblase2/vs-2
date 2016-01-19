@@ -44,8 +44,11 @@ public class BoardController {
         board.getComponents().setBoard(boardUrl);
         response.setHeader("Location", boardUrl);
         try {
-            String brokerLocation = restTemplate.postForLocation(board.getComponents().getBroker() + "/brokers", new GameCreateDTO(board.getComponents())).toString();
+            String brokerLocation = restTemplate.postForLocation(board.getComponents().getBroker() + "/broker", new GameCreateDTO(board.getComponents())).toString();
             board.getComponents().setBroker(brokerLocation);
+
+            String bankLocation = restTemplate.postForLocation(board.getComponents().getBank() + "/banks", new GameCreateDTO(board.getComponents())).toString();
+            board.getComponents().setBank(bankLocation);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,10 +59,10 @@ public class BoardController {
             try {
                 List<Integer> rent = IntStream.of(config.getRent()).boxed().collect(Collectors.toList());
                 List<Integer> house = IntStream.of(config.getHouseCost()).boxed().collect(Collectors.toList());
-                String url = this.restTemplate.postForObject(board.getComponents().getBroker() + "/places/" + i, new Estate(config.getName(), null, config.getValue(), rent, house, 0), String.class);
-                board.getFields().get(i).setBroker(url);
+                this.restTemplate.put(board.getComponents().getBroker() + "/places/" + i, new Estate(config.getName(), null, config.getValue(), rent, house, 0));
+                board.getFields().get(i).setBroker(board.getComponents().getBroker() + "/places/" + i);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Could not place. " + board.getComponents().getBroker() + "/places/" + i);
             }
         }
     }
@@ -78,6 +81,12 @@ public class BoardController {
         }
         b.addPlayer(player);
         response.setHeader("Location", uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(boardid, playerid).toUriString());
+
+        try {
+            this.restTemplate.postForLocation(b.getComponents().getBank() + "/players", new PlayerAndAmountDTO(playerid, 1000));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/boards/{boardid}/players/{playerid}")

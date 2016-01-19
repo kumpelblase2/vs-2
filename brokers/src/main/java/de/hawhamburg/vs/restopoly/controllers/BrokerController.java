@@ -1,6 +1,7 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.ServiceRegistrator;
+import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.errors.OwnedByYourselfException;
@@ -39,17 +40,12 @@ public class BrokerController {
     @Value("${main_service}")
     private String mainServiceUrl;
 
-    private String bankServiceUrl;
-
-    @PostConstruct
-    public void init() {
-        this.bankServiceUrl = ServiceRegistrator.lookupService(this.mainServiceUrl, "banks");
-    }
-
+    GameCreateDTO gameComponents;
     // Create Broker
     @RequestMapping(method = RequestMethod.POST, value = "/broker")
-    public void createBroker(UriComponentsBuilder uriBuilder, HttpServletResponse response) {
+    public void createBroker(@RequestBody GameCreateDTO createComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Broker b = brokerManager.createBroker();
+        gameComponents = createComponents;
         response.setHeader("Location", uriBuilder.path(BROKER_URL).buildAndExpand(b.getId()).toUriString());
     }
 
@@ -78,7 +74,7 @@ public class BrokerController {
             int amount = broker.getRent(placeid);
             String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, amount);
             try {
-                restTemplate.postForLocation(bankServiceUrl + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
+                restTemplate.postForLocation(gameComponents.getComponents().getBank() + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -111,7 +107,7 @@ public class BrokerController {
         if (owner == null || !owner.getId().equals(player.getId())) {
             String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, broker.getValue(place));
             try {
-                restTemplate.postForLocation(url, "Player " + player + " bought " + place);
+                restTemplate.postForLocation(gameComponents.getComponents().getBank() + url, "Player " + player + " bought " + place);
             } catch (Exception e) {
                 e.printStackTrace();
             }

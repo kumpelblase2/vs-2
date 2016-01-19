@@ -76,7 +76,7 @@ public class GameController {
         }
         String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, newPlayer.getId()).toUriString();
         response.setHeader("Location", playerUri);
-        EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+        EventPublisher.sendEvent(g.getComponents().getEvents(),
                 new Event("Player " + player + " registered in game " + g.getGameid(), "player-registered", "", playerUri, player, null));
     }
 
@@ -93,7 +93,7 @@ public class GameController {
             throw new NotFoundException();
         }
 
-        EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+        EventPublisher.sendEvent(g.getComponents().getEvents(),
                 new Event("Player " + player + " removed from game " + g.getGameid(), "player-removed", "", "", player, null));
     }
 
@@ -115,7 +115,7 @@ public class GameController {
             }
 
             String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, playerid).toUriString();
-            EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+            EventPublisher.sendEvent(g.getComponents().getEvents(),
                     new Event("Player " + playerid + " ready", "player-ready", "", playerUri, playerid, null));
 
             return g;
@@ -165,7 +165,7 @@ public class GameController {
                 if(g.isMutexAcquired()) {
                     g.setMutexAcquired(false);
                     String playerUri = uriBuilder.path(PLAYER_URL).buildAndExpand(gameid, playerid).toUriString();
-                    EventPublisher.sendEvent(g.getComponents().getEvents(), g.getGameid(),
+                    EventPublisher.sendEvent(g.getComponents().getEvents(),
                             new Event("Player " + playerid + " done with turn", "player-turn-over", "", playerUri, playerid, null));
                     return new ResponseEntity(HttpStatus.OK);
                 } else {

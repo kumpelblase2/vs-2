@@ -44,11 +44,11 @@ public class BoardController {
         board.getComponents().setBoard(boardUrl);
         response.setHeader("Location", boardUrl);
         try {
-            String brokerLocation = restTemplate.postForLocation(board.getComponents().getBroker() + "/broker", new GameCreateDTO(board.getComponents())).toString();
-            board.getComponents().setBroker(brokerLocation);
-
             String bankLocation = restTemplate.postForLocation(board.getComponents().getBank() + "/banks", new GameCreateDTO(board.getComponents())).toString();
             board.getComponents().setBank(bankLocation);
+
+            String brokerLocation = restTemplate.postForLocation(board.getComponents().getBroker() + "/broker", new GameCreateDTO(board.getComponents())).toString();
+            board.getComponents().setBroker(brokerLocation);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,7 +118,7 @@ public class BoardController {
         if(player.getId().equals(playerid)) {
             b.movePlayer(playerid, amount);
             String playerUri = uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(boardid, playerid).toUriString();
-            EventPublisher.sendEvent(b.getComponents().getEvents(), boardid,
+            EventPublisher.sendEvent(b.getComponents().getEvents(),
                     new Event("Player " + playerid + " moved " + amount, "player-move", "", playerUri, playerid, null));
             return new PlayerMoveResponse(player, new GameBoardDTO(b));
         } else {

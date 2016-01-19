@@ -15,6 +15,15 @@ public class Estate {
 
     public Estate() {}
 
+    public Estate(String place, String owner, int value, List<Integer> rent, List<Integer> cost, int houses) {
+        this.place = place;
+        this.owner = owner;
+        this.value = value;
+        this.rent = rent;
+        this.cost = cost;
+        this.houses = houses;
+    }
+
     public String getPlace() {
         return place;
     }

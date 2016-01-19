@@ -2,9 +2,7 @@ package de.hawhamburg.vs.restopoly.controllers;
 
 import de.hawhamburg.vs.restopoly.EventPublisher;
 import de.hawhamburg.vs.restopoly.data.dto.*;
-import de.hawhamburg.vs.restopoly.data.model.Event;
-import de.hawhamburg.vs.restopoly.data.model.Field;
-import de.hawhamburg.vs.restopoly.data.model.GameBoard;
+import de.hawhamburg.vs.restopoly.data.model.*;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.manager.GameBoardManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +13,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @CrossOrigin
 @RestController
@@ -39,8 +40,28 @@ public class BoardController {
     @RequestMapping(method = RequestMethod.POST, value = "/boards")
     public void createBoard(@RequestBody GameCreateDTO createComponents, UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         GameBoard board = this.gameBoardManager.createBoard(createComponents.getComponents());
-        response.setHeader("Location", uriBuilder.path(CREATED_BOARD_LOCATION).buildAndExpand(board.getId()).toUriString());
-        //TODO create other services
+        String boardUrl = uriBuilder.path(CREATED_BOARD_LOCATION).buildAndExpand(board.getId()).toUriString();
+        board.getComponents().setBoard(boardUrl);
+        response.setHeader("Location", boardUrl);
+        try {
+            String brokerLocation = restTemplate.postForLocation(board.getComponents().getBroker() + "/brokers", new GameCreateDTO(board.getComponents())).toString();
+            board.getComponents().setBroker(brokerLocation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        List<PlaceConfig> placeConfigList = this.gameBoardManager.getConfigForBoard(board);
+        for(int i = 0; i < placeConfigList.size(); i++) {
+            PlaceConfig config = placeConfigList.get(i);
+            try {
+                List<Integer> rent = IntStream.of(config.getRent()).boxed().collect(Collectors.toList());
+                List<Integer> house = IntStream.of(config.getHouseCost()).boxed().collect(Collectors.toList());
+                String url = this.restTemplate.postForObject(board.getComponents().getBroker() + "/places/" + i, new Estate(config.getName(), null, config.getValue(), rent, house, 0), String.class);
+                board.getFields().get(i).setBroker(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -127,11 +148,11 @@ public class BoardController {
         return result;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/borads/{boardid}/places/{place}")
+    @RequestMapping(method = RequestMethod.GET, value = "/boards/{boardid}/places/{place}")
     public PlaceDTO getPlace(@PathVariable("boardid") int boardid, @PathVariable("place") int place) {
         GameBoard board = this.gameBoardManager.getBoard(boardid).orElseThrow(NotFoundException::new);
         if(board.getFields().size() > place && place >= 0) {
-            return new PlaceDTO(board.getFields().get(place), board.getComponents().getBroker() + "/places/" + place);
+            return new PlaceDTO(board.getFields().get(place));
         } else {
             throw new NotFoundException();
         }

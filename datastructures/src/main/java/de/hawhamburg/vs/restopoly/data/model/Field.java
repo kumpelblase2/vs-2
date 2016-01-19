@@ -1,21 +1,21 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
-import de.hawhamburg.vs.restopoly.data.dto.PlaceDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class Field {
     private String place;
     private List<GameBoard.Player> players;
+    private String broker;
 
-    public Field(String place, List<GameBoard.Player> players) {
+    public Field(String place, List<GameBoard.Player> players, String broker) {
         this.place = place;
         this.players = players;
+        this.broker = broker;
     }
 
-    public Field(PlaceDTO place) {
-        this(place.getName(), new ArrayList<>());
+    public Field(PlaceConfig place) {
+        this(place.getName(), new ArrayList<>(), "");
     }
 
     public Field() {
@@ -35,6 +35,14 @@ public class Field {
 
     public void setPlayers(List<GameBoard.Player> players) {
         this.players = players;
+    }
+
+    public String getBroker() {
+        return broker;
+    }
+
+    public void setBroker(String broker) {
+        this.broker = broker;
     }
 
     @Override

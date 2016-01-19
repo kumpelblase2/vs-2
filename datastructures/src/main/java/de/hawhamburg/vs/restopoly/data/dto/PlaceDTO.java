@@ -11,8 +11,8 @@ public class PlaceDTO {
         this.broker = broker;
     }
 
-    public PlaceDTO(Field inField, String broker) {
-        this(inField.getPlace(), broker);
+    public PlaceDTO(Field inField) {
+        this(inField.getPlace(), inField.getBroker());
     }
 
     public String getName() {

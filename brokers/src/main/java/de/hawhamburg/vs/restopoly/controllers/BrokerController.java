@@ -24,8 +24,8 @@ import java.util.Optional;
 @CrossOrigin
 @RestController
 public class BrokerController {
-    private static final String BANK_TRANSFER_URL = "/from/%s/to/%s/%d";
-    private static final String BANK_BUY_URL = "/from/%s/%d";
+    private static final String BANK_TRANSFER_URL = "/transfer/from/%s/to/%s/%d";
+    private static final String BANK_BUY_URL = "/transfer/from/%s/%d";
 
     private static final String BROKER_URL = "/broker/{brokerid}";
 
@@ -101,14 +101,15 @@ public class BrokerController {
             throw new NotFoundException();
 
         Player owner = broker.getOwner(place);
-        if (owner == null || !owner.getId().equals(player.getId())) {
-            String url = String.format(BANK_BUY_URL, player, broker.getValue(place));
+        if (owner == null || owner.getId().isEmpty()) {
+            broker.setOwner(place, player);
+
+            String url = String.format(BANK_BUY_URL, player.getId(), broker.getValue(place));
             try {
                 restTemplate.postForLocation(gameComponents.getComponents().getBank() + url, "Player " + player + " bought " + place);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            broker.setOwner(place, player);
             return new ArrayList<>();
         }
         //ToDo Event ?

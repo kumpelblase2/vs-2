@@ -6,9 +6,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by JanDennis on 04.12.2015.
- */
 @Component
 public class BrokerManager {
     private Set<Broker> brokers = new HashSet<>();

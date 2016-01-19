@@ -1,7 +1,5 @@
 package de.hawhamburg.vs.restopoly.data.model;
 
-import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,21 +12,22 @@ public class Broker {
         this.id = id;
     }
 
-    public Boolean hasPlace(String Place) {
+    public boolean hasPlace(String Place) {
         return places.containsKey(Place);
     }
 
     public void addPlace(String name, Estate place) {
-        places.putIfAbsent(name, place);
+        places.put(name, place);
     }
 
     public void setOwner(String place, Player owner) {
         //Check if Place exists
-        places.keySet().stream().filter(pl -> pl == place).findFirst().orElseThrow(NotFoundException::new);
-        if (owners.containsKey(place)) {
-            owners.replace(place, owner);
-        } else {
-            owners.put(place, owner);
+        if(this.hasPlace(place)) {
+            if (owners.containsKey(place)) {
+                owners.replace(place, owner);
+            } else {
+                owners.put(place, owner);
+            }
         }
     }
 
@@ -50,5 +49,26 @@ public class Broker {
 
     public int getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Broker broker = (Broker) o;
+
+        if (id != broker.id) return false;
+        if (places != null ? !places.equals(broker.places) : broker.places != null) return false;
+        return owners != null ? owners.equals(broker.owners) : broker.owners == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (places != null ? places.hashCode() : 0);
+        result = 31 * result + (owners != null ? owners.hashCode() : 0);
+        return result;
     }
 }

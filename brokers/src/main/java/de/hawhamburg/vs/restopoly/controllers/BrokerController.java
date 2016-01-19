@@ -15,8 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -26,6 +28,8 @@ import java.util.Optional;
 public class BrokerController {
     private static final String BANK_TRANSFER_URL = "/%d/transfer/from/%s/to/%s/%d";
     private static final String BANK_BUY_URL = "/%d/transfer/from/%s/%d";
+
+    private static final String BROKER_URL = "/broker/{brokerid}";
 
     @Autowired
     private BrokerManager brokerManager;
@@ -43,23 +47,19 @@ public class BrokerController {
     }
 
     // Create Broker
-    @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(method = RequestMethod.PUT, value = "/broker/{gameid}")
-    public void createBroker(@PathVariable("gameid") int gameid) {
-        if (this.brokerManager.getBroker(gameid).isPresent()) {
-            throw new AlreadyExistsException();
-        } else {
-            this.brokerManager.createBroker(gameid);
-        }
+    @RequestMapping(method = RequestMethod.POST, value = "/broker")
+    public void createBroker(UriComponentsBuilder uriBuilder, HttpServletResponse response) {
+        Broker b = brokerManager.createBroker();
+        response.setHeader("Location", uriBuilder.path(BROKER_URL).buildAndExpand(b.getId()).toUriString());
     }
 
     // Create Places
-    @RequestMapping(method = RequestMethod.PUT, value = "/broker/{gameid}/places/{placeid}")
-    public ResponseEntity<String> putNewPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid,
+    @RequestMapping(method = RequestMethod.PUT, value = "/broker/{brokerId}/places/{placeid}")
+    public ResponseEntity<String> putNewPlace(@PathVariable("brokerId") int brokerId, @PathVariable("placeid") String placeid,
                                               @RequestBody Estate newPlace) {
-        Optional<Broker> broker = brokerManager.getBroker(gameid);
+        Optional<Broker> broker = brokerManager.getBroker(brokerId);
         Broker br = broker.orElseThrow(NotFoundException::new);
-        String uri = "/broker/" + gameid + "/places/" + placeid;
+        String uri = "/broker/" + brokerId + "/places/" + placeid;
         if(br.hasPlace(placeid)) {
             return new ResponseEntity<>(uri, HttpStatus.OK);
         } else {
@@ -70,13 +70,13 @@ public class BrokerController {
 
     // Player vistited Place
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/visit/{playerid}")
-    public Collection<Event> postPlayerVisitsPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
-        Broker broker = brokerManager.getBroker(gameid).get();
+    @RequestMapping(method = RequestMethod.POST, value = "/broker/{brokerId}/places/{placeid}/visit/{playerid}")
+    public Collection<Event> postPlayerVisitsPlace(@PathVariable("brokerId") int brokerId, @PathVariable("placeid") String placeid, @PathVariable("playerid") String player) {
+        Broker broker = brokerManager.getBroker(brokerId).get();
         String owner = broker.getOwner(placeid).getId();
         if (!owner.equals(player)) {
             int amount = broker.getRent(placeid);
-            String url = String.format(BANK_TRANSFER_URL, gameid, player, owner, amount);
+            String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, amount);
             try {
                 restTemplate.postForLocation(bankServiceUrl + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
             } catch (Exception e) {
@@ -88,9 +88,9 @@ public class BrokerController {
 
     // Returns Owner
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.GET, value = "/broker/{gameid}/places/{placeid}/owner")
-    public Player getOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place) {
-        Player pl = brokerManager.getBroker(gameid).get().getOwner(place);
+    @RequestMapping(method = RequestMethod.GET, value = "/broker/{brokerId}/places/{placeid}/owner")
+    public Player getOwner(@PathVariable("brokerId") int brokerId, @PathVariable("placeid") String place) {
+        Player pl = brokerManager.getBroker(brokerId).get().getOwner(place);
         if (pl == null)
             throw new NotFoundException();
 
@@ -100,16 +100,16 @@ public class BrokerController {
     //ToDo Add Events
     // Change Owner
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
-    public Collection<Event> changeOwner(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
-        Broker broker = brokerManager.getBroker(gameid).get();
+    @RequestMapping(method = RequestMethod.POST, value = "/broker/{brokerId}/places/{placeid}/owner")
+    public Collection<Event> changeOwner(@PathVariable("brokerId") int brokerId, @PathVariable("placeid") String place, @RequestBody Player player) {
+        Broker broker = brokerManager.getBroker(brokerId).get();
 
         if (!broker.hasPlace(place))
             throw new NotFoundException();
 
         Player owner = broker.getOwner(place);
         if (owner == null || !owner.getId().equals(player.getId())) {
-            String url = String.format(BANK_TRANSFER_URL, gameid, player, owner, broker.getValue(place));
+            String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, broker.getValue(place));
             try {
                 restTemplate.postForLocation(url, "Player " + player + " bought " + place);
             } catch (Exception e) {
@@ -121,23 +121,4 @@ public class BrokerController {
         //ToDo Event ?
         throw new OwnedByYourselfException();
     }
-
-    // Buy Place, fail if not for Sale (Already owned by someone)
-    /*@ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.POST, value = "/broker/{gameid}/places/{placeid}/owner")
-    public Event buyPlace(@PathVariable("gameid") int gameid, @PathVariable("placeid") String place, @RequestBody Player player) {
-        Broker broker = brokerManager.getBroker(gameid).get();
-        if (broker.getOwner(place) == null) {
-            broker.setOwner(place, player);
-            String url = String.format(BANK_BUY_URL,gameid,player.getId(),broker.getValue(place));
-            try {
-                restTemplate.postForLocation(url, "Player " + player.getName() + " bought " + place + "from Bank");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-        //TODO
-        throw new AlreadyExistsException();
-    }*/
 }

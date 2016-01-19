@@ -1,15 +1,18 @@
 package de.hawhamburg.vs.restopoly.data.dto;
 
-import de.hawhamburg.vs.restopoly.data.model.Player;
-
 public class PlayerAndAmountDTO {
-    private Player player;
+    private String player;
     private Integer amount;
 
     public PlayerAndAmountDTO() {
     }
 
-    public Player getPlayer() {
+    public PlayerAndAmountDTO(String player, Integer amount) {
+        this.player = player;
+        this.amount = amount;
+    }
+
+    public String getPlayer() {
         return player;
     }
 

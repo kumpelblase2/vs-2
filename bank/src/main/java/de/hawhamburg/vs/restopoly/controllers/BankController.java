@@ -29,7 +29,7 @@ public class BankController {
     @RequestMapping(method = RequestMethod.POST, value = "/banks/{bankid}/players")
     public ResponseEntity createNewBankAccount(@PathVariable("bankid") int gameid, @RequestBody PlayerAndAmountDTO body,
                                                UriComponentsBuilder uriBuilder) {
-        String player = body.getPlayer().getId();
+        String player = body.getPlayer();
         int amount = body.getAmount();
         Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         try {
@@ -54,7 +54,7 @@ public class BankController {
         Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount("bank", to, amount, reason);
         Event ev = new Event("Transfer " + amount + " from bank to " + to, "bank-transfer", reason, "/banks/" + gameid + "/transfers/" + transfer, "/game/" + gameid + "/players/" + to, "");
-        createTransfer(b.getComponents(), gameid, ev);
+        createTransfer(b.getComponents(), ev);
         return ev;
     }
 
@@ -63,7 +63,7 @@ public class BankController {
         Bank b = manager.getBank(gameid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount(from, "bank", amount, reason);
         Event ev = new Event("Transfer " + amount + " from " + from + " to bank", "bank-transfer", reason, "/banks/" + gameid + "/transfers/" + transfer, "/game/" + gameid + "/players/" + from, "");
-        createTransfer(b.getComponents(), gameid, ev);
+        createTransfer(b.getComponents(), ev);
         return ev;
     }
 
@@ -72,7 +72,7 @@ public class BankController {
         Bank b = manager.getBank(bankid).orElseThrow(NotFoundException::new);
         int transfer = b.transferAmount(from, to, amount, reason);
         Event ev = new Event("Transfer " + amount + " from " + from + " to " + to, "bank-transfer", reason, "/banks/" + bankid + "/transfers/" + transfer, b.getComponents().getGame() + "/players/" + from, "");
-        createTransfer(b.getComponents(), bankid, ev);
+        createTransfer(b.getComponents(), ev);
         return ev;
     }
 
@@ -93,9 +93,9 @@ public class BankController {
         return this.manager.getBank(gameId).map(Bank::getTransfers).map(tr -> new TransfersDTO(gameId, tr)).orElseThrow(NotFoundException::new);
     }
 
-    private void createTransfer(Components components, int gameid, Event ev) {
+    private void createTransfer(Components components, Event ev) {
         try {
-            String result = this.restTemplate.postForObject(components.getEvents() + "/events?gameid=" + gameid, ev, String.class);
+            String result = this.restTemplate.postForObject(components.getEvents(), ev, String.class);
             ev.setUri(result);
         } catch (Exception e) {
             e.printStackTrace();

@@ -13,7 +13,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +24,7 @@ public class BoardController {
     private static final String MUTEX_CHECK_URL = "/players/current";
     private static final String CREATED_PLAYER_LOCATION = "/boards/{boardid}/players/{playerid}";
     private static final String CREATED_BOARD_LOCATION = "/boards/{boardid}";
+    private static final int AMOUNT_NEW_ROUND = 2000;
 
     @Autowired
     private GameBoardManager gameBoardManager;
@@ -116,7 +116,15 @@ public class BoardController {
         }
 
         if(player.getId().equals(playerid)) {
+            int oldPos = b.getPlayer(playerid).getPosition();
             b.movePlayer(playerid, amount);
+            int newPos = b.getPlayer(playerid).getPosition();
+
+            if (newPos < oldPos) {
+                // Player moved over GO!
+                String url = b.getComponents().getBank() + "/transfer/to/" + playerid + "/" + AMOUNT_NEW_ROUND;
+                restTemplate.postForEntity(url, null, Event.class);
+            }
             String playerUri = uriBuilder.path(CREATED_PLAYER_LOCATION).buildAndExpand(boardid, playerid).toUriString();
             EventPublisher.sendEvent(b.getComponents().getEvents(),
                     new Event("Player " + playerid + " moved " + amount, "player-move", "", playerUri, playerid, null));

@@ -1,8 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
-import de.hawhamburg.vs.restopoly.ServiceRegistrator;
 import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
-import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.errors.OwnedByYourselfException;
 import de.hawhamburg.vs.restopoly.data.model.Broker;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +24,8 @@ import java.util.Optional;
 @CrossOrigin
 @RestController
 public class BrokerController {
-    private static final String BANK_TRANSFER_URL = "/%d/transfer/from/%s/to/%s/%d";
-    private static final String BANK_BUY_URL = "/%d/transfer/from/%s/%d";
+    private static final String BANK_TRANSFER_URL = "/from/%s/to/%s/%d";
+    private static final String BANK_BUY_URL = "/from/%s/%d";
 
     private static final String BROKER_URL = "/broker/{brokerid}";
 
@@ -60,7 +57,7 @@ public class BrokerController {
             return new ResponseEntity<>(uri, HttpStatus.OK);
         } else {
             br.addPlace(placeid, newPlace);
-            return new ResponseEntity<String>(uri, HttpStatus.CREATED);
+            return new ResponseEntity<>(uri, HttpStatus.CREATED);
         }
     }
 
@@ -72,7 +69,7 @@ public class BrokerController {
         String owner = broker.getOwner(placeid).getId();
         if (!owner.equals(player)) {
             int amount = broker.getRent(placeid);
-            String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, amount);
+            String url = String.format(BANK_TRANSFER_URL, player, owner, amount);
             try {
                 restTemplate.postForLocation(gameComponents.getComponents().getBank() + url, "Player " + player + " visited " + placeid + " and paid " + amount + " rent");
             } catch (Exception e) {
@@ -105,7 +102,7 @@ public class BrokerController {
 
         Player owner = broker.getOwner(place);
         if (owner == null || !owner.getId().equals(player.getId())) {
-            String url = String.format(BANK_TRANSFER_URL, brokerId, player, owner, broker.getValue(place));
+            String url = String.format(BANK_BUY_URL, player, broker.getValue(place));
             try {
                 restTemplate.postForLocation(gameComponents.getComponents().getBank() + url, "Player " + player + " bought " + place);
             } catch (Exception e) {

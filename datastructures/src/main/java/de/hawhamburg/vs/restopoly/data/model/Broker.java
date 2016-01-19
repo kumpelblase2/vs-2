@@ -6,8 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Broker {
+    private int id;
     private Map<String, Estate> places = new HashMap<>();
     private Map<String, Player> owners = new HashMap<>();
+
+    public Broker(int id) {
+        this.id = id;
+    }
 
     public Boolean hasPlace(String Place) {
         return places.containsKey(Place);
@@ -41,5 +46,9 @@ public class Broker {
 
     public int getRent(String place) {
         return places.get(place).getRent().get(places.get(place).getHouses());
+    }
+
+    public int getId() {
+        return id;
     }
 }

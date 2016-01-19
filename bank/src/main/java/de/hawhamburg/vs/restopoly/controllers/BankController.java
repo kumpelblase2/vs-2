@@ -1,5 +1,6 @@
 package de.hawhamburg.vs.restopoly.controllers;
 
+import de.hawhamburg.vs.restopoly.EventPublisher;
 import de.hawhamburg.vs.restopoly.data.dto.GameCreateDTO;
 import de.hawhamburg.vs.restopoly.data.dto.TransfersDTO;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
@@ -77,7 +78,7 @@ public class BankController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/banks")
-    public void createNewBank(GameCreateDTO inCreateDTO, UriComponentsBuilder uriBuilder,
+    public void createNewBank(@RequestBody GameCreateDTO inCreateDTO, UriComponentsBuilder uriBuilder,
                               HttpServletResponse response) {
         Bank b = manager.createBank(inCreateDTO.getComponents());
         response.setHeader("Location", uriBuilder.path(BANKS_URL).buildAndExpand(b.getId()).toUriString());
@@ -94,11 +95,6 @@ public class BankController {
     }
 
     private void createTransfer(Components components, Event ev) {
-        try {
-            String result = this.restTemplate.postForObject(components.getEvents(), ev, String.class);
-            ev.setUri(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            EventPublisher.sendEvent(components.getEvents(), ev);
     }
 }

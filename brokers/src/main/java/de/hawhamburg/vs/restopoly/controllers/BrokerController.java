@@ -97,7 +97,7 @@ public class BrokerController {
     public Collection<Event> changeOwner(@PathVariable("brokerId") int brokerId, @PathVariable("placeid") String place, @RequestBody Player player) {
         Broker broker = brokerManager.getBroker(brokerId).get();
 
-        if (!broker.hasPlace(place))
+        if (!broker.hasPlace(place) || broker.getValue(place) <= 0)
             throw new NotFoundException();
 
         Player owner = broker.getOwner(place);

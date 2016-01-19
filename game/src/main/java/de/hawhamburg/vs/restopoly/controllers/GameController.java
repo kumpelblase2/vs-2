@@ -3,6 +3,7 @@ package de.hawhamburg.vs.restopoly.controllers;
 import de.hawhamburg.vs.restopoly.EventPublisher;
 import de.hawhamburg.vs.restopoly.data.dto.*;
 import de.hawhamburg.vs.restopoly.data.errors.AlreadyExistsException;
+import de.hawhamburg.vs.restopoly.data.errors.NotAuthorizedException;
 import de.hawhamburg.vs.restopoly.data.errors.NotFoundException;
 import de.hawhamburg.vs.restopoly.data.model.Event;
 import de.hawhamburg.vs.restopoly.data.model.Game;
@@ -62,6 +63,10 @@ public class GameController {
                                @RequestParam("name") String playername, @RequestParam("uri") String uri,
                                UriComponentsBuilder uriBuilder, HttpServletResponse response) {
         Game g = this.gameManager.getGame(gameid).orElseThrow(NotFoundException::new);
+        if(g.isStarted()) {
+            throw new NotAuthorizedException();
+        }
+
         if(g.hasPlayer(player)) {
             throw new AlreadyExistsException();
         }
